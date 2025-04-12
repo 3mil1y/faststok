@@ -32,10 +32,38 @@ class ExternalTransferForm extends TransferForm {
                         ['required' => true]
                     ) . "
                 </div>
-                <p class='" . self::CLASSES['hint'] . "'>Selecione a localização do produto a ser transferido</p>
+                <p class='" . self::CLASSES['hint'] . "'>Selecione a localização a ser transferida</p>
             </div>
 
-            <div class='" . self::CLASSES['section'] . "'>
+            <div class='" . self::CLASSES['button_group'] . "'>
+                <a href='/transfer' 
+                   class='" . self::CLASSES['button'] . " " . self::CLASSES['button_secondary'] . "'>
+                    Cancelar
+                </a>
+                <button type='submit' 
+                        class='" . self::CLASSES['button'] . " " . self::CLASSES['button_primary'] . "'>
+                    Realizar Transferência Externa
+                </button>
+            </div>
+        </form>
+        
+        <script>
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const quantity = parseInt(document.querySelector('input[name=quantity]').value);
+                
+                if (quantity <= 0) {
+                    e.preventDefault();
+                    alert('A quantidade deve ser maior que zero.');
+                }
+            });
+        </script>";
+    }
+}
+
+//Detalhes da transferência - implementar mais tarde
+
+/*
+<div class='" . self::CLASSES['section'] . "'>
                 <h3 class='" . self::CLASSES['section_title'] . "'>Informações da Transferência</h3>
                 <div class='space-y-4'>
                     " . self::generateTextInput('destination', 'Destino',
@@ -71,29 +99,5 @@ class ExternalTransferForm extends TransferForm {
                         ]
                     ) . "
                 </div>
-            </div>
-
-            <div class='" . self::CLASSES['button_group'] . "'>
-                <a href='/transfer' 
-                   class='" . self::CLASSES['button'] . " " . self::CLASSES['button_secondary'] . "'>
-                    Cancelar
-                </a>
-                <button type='submit' 
-                        class='" . self::CLASSES['button'] . " " . self::CLASSES['button_primary'] . "'>
-                    Realizar Transferência Externa
-                </button>
-            </div>
-        </form>
-        
-        <script>
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const quantity = parseInt(document.querySelector('input[name=quantity]').value);
-                
-                if (quantity <= 0) {
-                    e.preventDefault();
-                    alert('A quantidade deve ser maior que zero.');
-                }
-            });
-        </script>";
-    }
-}
+                </div>
+*/

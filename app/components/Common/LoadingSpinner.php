@@ -1,6 +1,8 @@
 <?php
 namespace App\Components\Common;
 
+//Maybe will be removed later
+
 class LoadingSpinner {
     private const CLASSES = [
         'overlay' => 'fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50',

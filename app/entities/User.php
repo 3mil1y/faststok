@@ -4,13 +4,13 @@ namespace App\Entities;
 
 class User {
     private int $id;
-    private string $name;
+    private string $login;
     private string $password;
     private string $role;
 
-    public function __construct(string $name, string $password, string $role = 'user', int $id = -1) {
+    public function __construct(string $login, string $password, string $role = 'user', int $id = -1) {
         $this->id = $id;
-        $this->name = $name;
+        $this->login = $login;
         $this->password = $password;
         $this->role = $role;
     }
@@ -23,12 +23,12 @@ class User {
         $this->id = $id;
     }
 
-    public function getName(): string {
-        return $this->name;
+    public function getlogin(): string {
+        return $this->login;
     }
 
-    public function setName(string $name): void {
-        $this->name = $name;
+    public function setlogin(string $login): void {
+        $this->login = $login;
     }
 
     public function getPassword(): string {

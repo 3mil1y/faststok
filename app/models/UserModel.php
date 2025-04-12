@@ -53,7 +53,7 @@ class UserModel {
     /**
      * Find user by ID
      */
-    public static function findById(int $id): ?User {
+    public static function getById(int $id): ?User {
         try {
             $sql = "SELECT id, login, role FROM user WHERE id = ?";
             $params = [$id];

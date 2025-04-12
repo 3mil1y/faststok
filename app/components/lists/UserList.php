@@ -35,7 +35,7 @@ class UserList {
         return "
         <div class='" . self::CLASSES['card'] . "'>
             <div class='" . self::CLASSES['header'] . "'>
-                <h3 class='" . self::CLASSES['title'] . "'>{$user->getName()}</h3>
+                <h3 class='" . self::CLASSES['title'] . "'>{$user->getLogin()}</h3>
             </div>
             
             <div class='" . self::CLASSES['body'] . "'>
@@ -46,7 +46,7 @@ class UserList {
             </div>
             
             <div class='" . self::CLASSES['footer'] . "'>
-                <a href='/user/edit/{$user->getId()}' 
+                <a href='admin/editUser/{$user->getId()}' 
                    class='" . self::CLASSES['button'] . " " . self::CLASSES['button_primary'] . "'>
                     Editar
                 </a>

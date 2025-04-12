@@ -10,12 +10,4 @@ class UserController extends Controller {
         $error = ($errorMessage === 'invalidCredentials') ? 'E-mail ou senha incorretos, por favor tente novamente!' : null;
         $this->view("login", compact("title", "error"));
     }
-
-    public function index() {
-        $title = "User List";
-        $users = UserModel::list() ?? [];
-        $this->view("userList", compact("title", "users"));
-    }
-
-    
 }

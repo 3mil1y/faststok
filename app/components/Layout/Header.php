@@ -22,7 +22,7 @@ class Header {
         'admin' => 'text-white px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm',
         'enderecamento' => 'text-white px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700 transition-colors duration-200 shadow-sm',
         'relatorios' => 'text-white px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 transition-colors duration-200 shadow-sm',
-        'transferencias' => 'text-white px-4 py-2 rounded-md bg-yellow-600 hover:bg-yellow-700 transition-colors duration-200 shadow-sm',
+        'transfers' => 'text-white px-4 py-2 rounded-md bg-yellow-600 hover:bg-yellow-700 transition-colors duration-200 shadow-sm',
         'usuario' => 'text-white px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm'
     ];
 
@@ -58,8 +58,9 @@ class Header {
                         Endereçamento
                     </button>
                     <div id='enderecamentoDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
-                        <a href='produto/pesquisar' class='" . self::CLASSES['dropdown_item'] . "'>Buscar Endereços</a>
-                        <a href='produto/cadastrar' class='" . self::CLASSES['dropdown_item'] . "'>Endereçar Produto</a>
+                        <a href='product/home' class='" . self::CLASSES['dropdown_item'] . "'>Listar Produto</a>
+                        <a href='product/search' class='" . self::CLASSES['dropdown_item'] . "'>Buscar Produto</a>
+                        <a href='product/create' class='" . self::CLASSES['dropdown_item'] . "'>Endereçar Produto</a>
                     </div>
                 </div>
 
@@ -76,19 +77,19 @@ class Header {
 
                 <!-- Transferências Dropdown -->
                 <div class='" . self::CLASSES['dropdown_container'] . "'>
-                    <button onclick='toggleDropdown(\"transferenciasDropdown\")' class='" . self::CLASSES['dropdown_button'] . " bg-yellow-600 hover:bg-yellow-700'>
+                    <button onclick='toggleDropdown(\"transfersDropdown\")' class='" . self::CLASSES['dropdown_button'] . " bg-yellow-600 hover:bg-yellow-700'>
                         Transferências
                     </button>
-                    <div id='transferenciasDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
-                        <a href='transferencia/interna' class='" . self::CLASSES['dropdown_item'] . "'>Internas</a>
-                        <a href='transferencia/saida' class='" . self::CLASSES['dropdown_item'] . "'>Saída</a>
+                    <div id='transfersDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
+                        <a href='transfer/internal' class='" . self::CLASSES['dropdown_item'] . "'>Internas</a>
+                        <a href='transfer/external' class='" . self::CLASSES['dropdown_item'] . "'>Saída</a>
                     </div>
                 </div>
 
                 <!-- Admin Dropdown -->
                 <div class='" . self::CLASSES['dropdown_container'] . "'>
                     <button onclick='toggleDropdown(\"adminDropdown\")' class='" . self::CLASSES['dropdown_button'] . " bg-blue-600 hover:bg-blue-700'>
-                        Alterações
+                        Admin
                     </button>
                     <div id='adminDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
                         <a href='admin/list' class='" . self::CLASSES['dropdown_item'] . "'>Listar Usuários</a>
@@ -102,7 +103,7 @@ class Header {
                         Usuário
                     </button>
                     <div id='usuarioDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
-                        <a href='usuario/logout' class='" . self::CLASSES['dropdown_item'] . "'>Sair</a>
+                        <a href='user/logout' class='" . self::CLASSES['dropdown_item'] . "'>Sair</a>
                     </div>
                 </div>
             </div>
@@ -145,17 +146,17 @@ class Header {
                 </svg>
             </button>
             <div id='mobile-menu' class='" . self::CLASSES['mobile_menu'] . "'>
-                <a href='/produto/home' class='" . self::CLASSES['mobile_menu_item'] . "'>Home</a>
-                <a href='/produto/listar' class='" . self::CLASSES['mobile_menu_item'] . "'>Produtos</a>
+                <a href='/product/home' class='" . self::CLASSES['mobile_menu_item'] . "'>Home</a>
+                <a href='/product/search' class='" . self::CLASSES['mobile_menu_item'] . "'>Produtos</a>
                 <a href='/product/create' class='" . self::CLASSES['mobile_menu_item'] . "'>Cadastrar Produto</a>
-                <a href='/produto/pesquisar' class='" . self::CLASSES['mobile_menu_item'] . "'>Pesquisar</a>
-                <a href='/relatorio/validade' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Validade</a>
-                <a href='/relatorio/estoque' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
-                <a href='/transferencia/interna' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências Internas</a>
-                <a href='/transferencia/saida' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências de Saída</a>
-                <a href='/usuario/listar' class='" . self::CLASSES['mobile_menu_item'] . "'>Listar Usuários</a>
-                <a href='/usuario/cadastrar' class='" . self::CLASSES['mobile_menu_item'] . "'>Adicionar Usuário</a>
-                <a href='/usuario/logout' class='" . self::CLASSES['mobile_menu_item'] . "'>Sair</a>
+                <a href='/product/search' class='" . self::CLASSES['mobile_menu_item'] . "'>Pesquisar</a>
+                <a href='/report/expiry' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Validade</a>
+                <a href='/report/stock' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
+                <a href='/transfer/internal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências Internas</a>
+                <a href='/transfer/external' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências de Saída</a>
+                <a href='/admin/list' class='" . self::CLASSES['mobile_menu_item'] . "'>Listar Usuários</a>
+                <a href='/admin/createUser' class='" . self::CLASSES['mobile_menu_item'] . "'>Adicionar Usuário</a>
+                <a href='/user/logout' class='" . self::CLASSES['mobile_menu_item'] . "'>Sair</a>
             </div>
             <script>
                 document.getElementById('mobile-menu-button').addEventListener('click', function() {

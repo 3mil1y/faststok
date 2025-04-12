@@ -1,7 +1,7 @@
 <?php
 namespace App\Components\Message;
 
-//Probably can be removed later
+//Probably gonna be removed later
 
 class Message {
     private const CLASSES = [

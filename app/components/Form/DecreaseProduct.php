@@ -3,7 +3,7 @@ namespace App\Components\Form;
 
 use App\Entities\Product;
 
-class DecreaseProductForm extends BaseForm {
+class DecreaseProduct extends BaseForm {
     public static function render(string $action, array $params = []): string {
         $product = $params['product'] ?? null;
         if (!$product) {
@@ -60,13 +60,7 @@ class DecreaseProductForm extends BaseForm {
                 </p>
             </div>
 
-            <div class='" . self::CLASSES['section'] . "'>
-                <h3 class='" . self::CLASSES['section_title'] . "'>Motivo da Baixa</h3>
-                " . self::generateTextarea('reason', 'Motivo',
-                    '',
-                    ['required' => true]
-                ) . "
-            </div>
+            
 
             <div class='" . self::CLASSES['button_group'] . "'>
                 <a href='/product/list' 
@@ -93,3 +87,16 @@ class DecreaseProductForm extends BaseForm {
         </script>";
     }
 }
+
+
+//Motivo da baixa - implementar mais tarde
+
+/*
+<div class='" . self::CLASSES['section'] . "'>
+                <h3 class='" . self::CLASSES['section_title'] . "'>Motivo da Baixa</h3>
+                " . self::generateTextarea('reason', 'Motivo',
+                    '',
+                    ['required' => true]
+                ) . "
+            </div>
+*/

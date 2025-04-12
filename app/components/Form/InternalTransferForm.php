@@ -59,16 +59,6 @@ class InternalTransferForm extends TransferForm {
                 <p class='" . self::CLASSES['hint'] . "'>Selecione a nova localização para os produtos</p>
             </div>
 
-            <div class='" . self::CLASSES['section'] . "'>
-                <h3 class='" . self::CLASSES['section_title'] . "'>Detalhes da Transferência</h3>
-                " . self::generateTextarea('notes', 'Observações',
-                    '',
-                    [
-                        'placeholder' => 'Adicione informações relevantes sobre a transferência (opcional)'
-                    ]
-                ) . "
-            </div>
-
             <div class='" . self::CLASSES['button_group'] . "'>
                 <a href='/transfer' 
                    class='" . self::CLASSES['button'] . " " . self::CLASSES['button_secondary'] . "'>
@@ -105,3 +95,17 @@ class InternalTransferForm extends TransferForm {
         </script>";
     }
 }
+
+/* Campo de Detalhes da Transferência - implementar mais tarde*/
+
+/* 
+<div class='" . self::CLASSES['section'] . "'>
+                <h3 class='" . self::CLASSES['section_title'] . "'>Detalhes da Transferência</h3>
+                " . self::generateTextarea('notes', 'Observações',
+                    '',
+                    [
+                        'placeholder' => 'Adicione informações relevantes sobre a transferência (opcional)'
+                    ]
+                ) . "
+            </div>
+*/

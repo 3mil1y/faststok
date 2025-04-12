@@ -2,14 +2,14 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\ProdutoModel;
+use App\Models\ProductModel;
 use App\Core\DbConnect;
 
 class ProductController extends Controller {
     public function home() {
         $title = "Lista de Produtos";
         // Fetch all products from the database
-        $products = ProdutoModel::list() ?? [];
+        $products = ProductModel::list() ?? [];
         $this->view("productList", compact("title", "products"));
     }
 
