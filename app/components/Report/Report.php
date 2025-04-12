@@ -1,10 +1,12 @@
 <?php
-namespace Components\Report;
+namespace App\Components\Report;
 
-use Produto\Produto;
-use Endereco\Endereco;
+use App\Entities\Product;
+use App\Entities\Location;
 
-class Relatorio {
+//needs refactoring and improvements (fuck, that gonna destroy my brains)
+
+class Report {
     private const CLASSES = [
         'container' => 'p-4 bg-white rounded-2xl shadow-lg w-full max-w-4xl mx-auto',
         'titulo' => 'text-xl font-semibold mb-3 text-center',
@@ -29,13 +31,13 @@ class Relatorio {
         return $cabecalho;
     }
 
-    private static function gerarLinhaProduto(Produto $produto): string {
+    private static function gerarLinhaProduto(Product $produto): string {
         return "<tr class='" . self::CLASSES['row'] . "'>
-            <td class='" . self::CLASSES['cell'] . "'>{$produto->getNome()}</td>
-            <td class='" . self::CLASSES['cell'] . "'>{$produto->getCodBarras()}</td>
-            <td class='" . self::CLASSES['cell'] . "'>{$produto->getValidade()}</td>
-            <td class='" . self::CLASSES['cell'] . "'>{$produto->getQuantidade()}</td>
-            <td class='" . self::CLASSES['cell'] . "'>{$produto->getEnderecoStrg()}</td>
+            <td class='" . self::CLASSES['cell'] . "'>{$produto->getName()}</td>
+            <td class='" . self::CLASSES['cell'] . "'>{$produto->getBarcode()}</td>
+            <td class='" . self::CLASSES['cell'] . "'>{$produto->getExpiryDate()}</td>
+            <td class='" . self::CLASSES['cell'] . "'>{$produto->getQuantity()}</td>
+            <td class='" . self::CLASSES['cell'] . "'>{$produto->getLocationString()}</td>
         </tr>";
     }
 

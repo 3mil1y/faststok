@@ -1,312 +1,314 @@
 <?php
-namespace models;
+namespace App\Models;
 
-use core\DbConnect;
-use Produto\Produto;
-use Endereco\Endereco;
+use App\Entities\Product;
+use App\Entities\Location;
+use App\Core\Database;
 use Exception;
 
 class ProdutoModel {
 
-    // private DbConnect $dbConnect;
+    /* needs refactoring */
 
-    // public function __construct(DbConnect $dbConnect) {
-    //     $this->dbConnect = $dbConnect;
+    // private Database $Database;
+
+    // public function __construct(Database $Database) {
+    //     $this->Database = $Database;
     // }
 
     /**
-     * Função para inserir um novo produto no banco de dados.
+     * Função para inserir um novo product no banco de dados.
      */
-    public static function Cadastrar(Produto $produto): bool {
+    public static function Cadastrar(Product $product): bool {
         try {
-            // SQL para inserir o produto
-            $sql = "INSERT INTO produto (codBarras, nome, quantidade, validade, idEndereco) 
+            // SQL para inserir o product
+            $sql = "INSERT INTO product (codBarras, nome, quantidade, validade, idlocation) 
                     VALUES (?, ?, ?, ?, ?)";
             
             // Parâmetros a serem passados para o prepared statement
-            $params = self::extrairDadosProduto($produto);
+            $params = self::extrairDadosproduct($product);
             
             // Executa a query
-            DbConnect::executePrepared($sql, "ssiss", $params);
+            Database::executePrepared($sql, "ssiss", $params);
             
             return true;
         } catch (Exception $e) {
-            throw new Exception("Erro ao inserir produto: " . $e->getMessage());
+            throw new Exception("Erro ao inserir product: " . $e->getMessage());
         }
     }
 
     /**
-     * Função para listar todos os produtos do banco de dados.
+     * Função para listar todos os products do banco de dados.
      */
-    public static function listar(): array {
+    public static function list(): array {
         try {
-            $sql = "SELECT produto.*, endereco.* FROM produto INNER JOIN endereco ON produto.idEndereco = endereco.id";
-            $result = DbConnect::query($sql);
+            $sql = "SELECT product.*, location.* FROM product INNER JOIN location ON product.idEndereco = location.id";
+            $result = Database::query($sql);
             
-            $produtos = [];
+            $products = [];
             while ($row = $result->fetch_assoc()) {
-                $produtos[] = self::mapearProduto($row);
+                $products[] = self::productMap($row);
             }
-            return $produtos;
+            return $products;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produtos: " . $e->getMessage());
+            throw new Exception("Erro ao listar products: " . $e->getMessage());
         }
     }
 
     /**
-     * Lista os produtos próximos a validade.
+     * Lista os products próximos a validade.
      */
-    public static function listarPorValidade(): array {
+    public static function listByExpiry(): array {
         try {
-            $sql = "SELECT produto.*, endereco.* FROM produto INNER JOIN endereco ON produto.idEndereco = endereco.id WHERE produto.validade <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)";
-            $result = DbConnect::query($sql);
+            $sql = "SELECT product.*, location.* FROM product INNER JOIN location ON product.idEndereco = location.id WHERE product.validade <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)";
+            $result = Database::query($sql);
             
-            $produtos = [];
+            $products = [];
             while ($row = $result->fetch_assoc()) {
-                $produtos[] = self::mapearProduto($row);
+                $products[] = self::productMap($row);
             }
-            return $produtos;
+            return $products;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produtos: " . $e->getMessage());
+            throw new Exception("Erro ao listar products: " . $e->getMessage());
         }
     }
 
     /**
-     * Lista os produtos com baixo estoque.
+     * Lista os products com baixo estoque.
      */
-    public static function listarPorEstoque(): array {
+    public static function listByStock(): array {
         try {
-            $sql = "SELECT produto.*, endereco.* FROM produto
-                    INNER JOIN endereco ON produto.idEndereco = endereco.id
-                    WHERE produto.quantidade <= 10 
-                    GROUP BY produto.codBarras";
-            $result = DbConnect::query($sql);
+            $sql = "SELECT product.*, location.* FROM product
+                    INNER JOIN location ON product.idEndereco = location.id
+                    WHERE product.quantidade <= 10 
+                    GROUP BY product.codBarras";
+            $result = Database::query($sql);
             
-            $produtos = [];
+            $products = [];
             while ($row = $result->fetch_assoc()) {
-                $produtos[] = self::mapearProduto($row);
+                $products[] = self::productMap($row);
             }
-            return $produtos;
+            return $products;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produtos: " . $e->getMessage());
+            throw new Exception("Erro ao listar products: " . $e->getMessage());
         }
     }
 
     public static function listarPorIdEstoque(int $id): array {
         try {
-            $sql = "SELECT produto.*, endereco.* FROM produto
-                    INNER JOIN endereco ON produto.idEndereco = endereco.id
-                    WHERE produto.idEndereco = ?";
+            $sql = "SELECT product.*, location.* FROM product
+                    INNER JOIN location ON product.idlocation = location.id
+                    WHERE product.idlocation = ?";
             $params = [$id];
-            $result = DbConnect::executePrepared($sql, "i", $params);
+            $result = Database::executePrepared($sql, "i", $params);
             
-            $produtos = [];
+            $products = [];
             while ($row = $result->fetch_assoc()) {
-                $produtos[] = self::mapearProduto($row);
+                $products[] = self::mapearproduct($row);
             }
-            return $produtos;
+            return $products;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produtos: " . $e->getMessage());
+            throw new Exception("Erro ao listar products: " . $e->getMessage());
         }
     }
 
     /**
-     * Função para listar produtos pelo ID.
+     * Função para listar products pelo ID.
      */
-    public static function listarPorId(int $id): ?Produto {
+    public static function listarPorId(int $id): ?Product {
         try {
-            // SQL para listar produtos pelo ID
-            $sql = "SELECT produto.*, endereco.* 
-                    FROM produto
-                    INNER JOIN endereco ON produto.idEndereco = endereco.id
-                    WHERE produto.idProduto = ?";
+            // SQL para listar products pelo ID
+            $sql = "SELECT product.*, location.* 
+                    FROM product
+                    INNER JOIN location ON product.idlocation = location.id
+                    WHERE product.idproduct = ?";
             
             // Parametrização da consulta
             $params = [$id];
             
             // Executa a consulta com executePrepared
-            $result = DbConnect::executePrepared($sql, "i", $params);
+            $result = Database::executePrepared($sql, "i", $params);
             
             if ($row = $result->fetch_assoc()) {
-                return self::mapearProduto($row);
+                return self::mapearproduct($row);
             }
             
             return null;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produto pelo ID: " . $e->getMessage());
+            throw new Exception("Erro ao listar product pelo ID: " . $e->getMessage());
         }
     }
     
 
     /**
-     * Função para listar produtos pelo código de barras.
+     * Função para listar products pelo código de barras.
      */
     public static function listarPorCodigoDeBarras(string $codBarras): array {
         try {
-            // SQL para listar produtos pelo código de barras
-            $sql = "SELECT produto.*, endereco.* 
-                    FROM produto
-                    INNER JOIN endereco ON produto.idEndereco = endereco.id
-                    WHERE produto.codBarras = ?";
+            // SQL para listar products pelo código de barras
+            $sql = "SELECT product.*, location.* 
+                    FROM product
+                    INNER JOIN location ON product.idlocation = location.id
+                    WHERE product.codBarras = ?";
             
             // Parametrização da consulta
             $params = [$codBarras];
             
             // Executa a consulta com executePrepared
-            $result = DbConnect::executePrepared($sql, "s", $params);
+            $result = Database::executePrepared($sql, "s", $params);
             
             // Mapeia os resultados
-            $produtos = [];
+            $products = [];
             while ($row = $result->fetch_assoc()) {
-                $produtos[] = self::mapearProduto($row);
+                $products[] = self::mapearproduct($row);
             }
             
-            return $produtos;
+            return $products;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produtos pelo código de barras: " . $e->getMessage());
+            throw new Exception("Erro ao listar products pelo código de barras: " . $e->getMessage());
         }
     }
 
 
     public static function listarPorNome(string $nome): array {
         try {
-            // SQL para listar produtos pelo nome
-            $sql = "SELECT produto.*, endereco.* 
-                    FROM produto
-                    INNER JOIN endereco ON produto.idEndereco = endereco.id
-                    WHERE produto.nome LIKE ?";
+            // SQL para listar products pelo nome
+            $sql = "SELECT product.*, location.* 
+                    FROM product
+                    INNER JOIN location ON product.idlocation = location.id
+                    WHERE product.nome LIKE ?";
             
             // Parametrização da consulta
             $params = ["%".$nome."%"];
             
             // Executa a consulta com executePrepared
-            $result = DbConnect::executePrepared($sql, "s", $params);
+            $result = Database::executePrepared($sql, "s", $params);
             
             // Mapeia os resultados
-            $produtos = [];
+            $products = [];
             while ($row = $result->fetch_assoc()) {
-                $produtos[] = self::mapearProduto($row);
+                $products[] = self::mapearproduct($row);
             }
             
-            return $produtos;
+            return $products;
         } catch (Exception $e) {
-            throw new Exception("Erro ao listar produtos pelo nome: " . $e->getMessage());
+            throw new Exception("Erro ao listar products pelo nome: " . $e->getMessage());
         }
     }
 
     /**
-     * Função para atualizar um produto no banco de dados.
+     * Função para atualizar um product no banco de dados.
      */
-    public static function atualizarProduto(Produto $produto): bool {
+    public static function atualizarproduct(Product $product): bool {
         try {
-            $sql = "UPDATE produto SET nome = ?, codBarras = ?, quantidade = ?, validade = ?, idEndereco = ?
-                    WHERE idProduto = ?";
+            $sql = "UPDATE product SET nome = ?, codBarras = ?, quantidade = ?, validade = ?, idlocation = ?
+                    WHERE idproduct = ?";
             
             // Parâmetros para a query
-            $params = self::extrairDadosProdutoCompleto($produto);
+            $params = self::extrairDadosproductCompleto($product);
             
-            DbConnect::executePrepared($sql, "ssissi", $params);
+            Database::executePrepared($sql, "ssissi", $params);
             
             return true;
         } catch (Exception $e) {
-            throw new Exception("Erro ao atualizar produto: " . $e->getMessage());
+            throw new Exception("Erro ao atualizar product: " . $e->getMessage());
         }
     }
 
-    public static function atualizarEnderecoProdutos(Endereco $origem, Endereco $destino): bool {
+    public static function atualizarlocationproducts(Location $origem, Location $destino): bool {
         try {
-            $sql = "UPDATE produto SET idEndereco = ?
-                    WHERE idEndereco = ?";
+            $sql = "UPDATE product SET idlocation = ?
+                    WHERE idlocation = ?";
             
             // Parâmetros para a query
             $params = [$destino->getId(), $origem->getId()];
             
-            DbConnect::executePrepared($sql, "ii", $params);
+            Database::executePrepared($sql, "ii", $params);
             
             return true;
         } catch (Exception $e) {
-            throw new Exception("Erro ao atualizar produto: " . $e->getMessage());
+            throw new Exception("Erro ao atualizar product: " . $e->getMessage());
         }
     }
 
     /**
-     * Função para atualizar quantidade de um produto no banco de dados.
+     * Função para atualizar quantidade de um product no banco de dados.
      */
-    public static function alterarEstoque(int $idProduto, int $quantidade): bool {
+    public static function alterarEstoque(int $idproduct, int $quantidade): bool {
         try {
-            $sql = "UPDATE produto SET quantidade = ?
-                    WHERE idProduto = ?";
+            $sql = "UPDATE product SET quantidade = ?
+                    WHERE idproduct = ?";
             
             // Parâmetros para a query
-            $params = [$quantidade, $idProduto];
+            $params = [$quantidade, $idproduct];
             
-            DbConnect::executePrepared($sql, "ii", $params);
+            Database::executePrepared($sql, "ii", $params);
             
             return true;
         } catch (Exception $e) {
-            throw new Exception("Erro ao atualizar quantidade do produto: " . $e->getMessage());
+            throw new Exception("Erro ao atualizar quantidade do product: " . $e->getMessage());
         }
     }
 
     /**
-     * Função para excluir um produto do banco de dados.
+     * Função para excluir um product do banco de dados.
      */
-    public static function excluirProduto(int $idProduto): bool {
+    public static function excluirproduct(int $idproduct): bool {
         try {
-            $sql = "DELETE FROM produto WHERE idProduto = ?";
-            $params = [$idProduto];
-            DbConnect::executePrepared($sql, "i", $params);
+            $sql = "DELETE FROM product WHERE idproduct = ?";
+            $params = [$idproduct];
+            Database::executePrepared($sql, "i", $params);
             
             return true;
         } catch (Exception $e) {
-            throw new Exception("Erro ao excluir produto: " . $e->getMessage());
+            throw new Exception("Erro ao excluir product: " . $e->getMessage());
         }
     }
 
-    public static function excluirProdutoPorEndereco(Endereco $endereco): bool {
+    public static function deleteProductByLocation(Location $location): bool {
         try {
-            $sql = "DELETE FROM produto WHERE idEndereco = ?";
-            $params = [$endereco->getId()];
-            DbConnect::executePrepared($sql, "i", $params);
+            $sql = "DELETE FROM product WHERE idlocation = ?";
+            $params = [$location->getId()];
+            Database::executePrepared($sql, "i", $params);
             
             return true;
         } catch (Exception $e) {
-            throw new Exception("Erro ao excluir produto por endereço: " . $e->getMessage());
+            throw new Exception("Erro ao excluir product por endereço: " . $e->getMessage());
         }
     }
 
     /**
-     * Função para mapear o resultado do banco para o objeto Produto.
+     * Função para mapear o resultado do banco para o objeto product.
      */
-    private static function mapearProduto(array $row): Produto {
-        $endereco = new Endereco($row['setor'], $row['andar'], $row['posicao'], $row['id']);
-        return new Produto($row['codBarras'], $row['nome'], $row['quantidade'], $row['validade'], $endereco, $row['idProduto']);
+    private static function productMap(array $row): Product {
+        $location = new Location($row['sector'], $row['floor'], $row['position'], $row['id']);
+        return new Product($row['codBarras'], $row['nome'], $row['quantidade'], $row['validade'], $location, $row['idProduto']);
     }
 
     /**
-     * Extrai os dados básicos do produto para inserção
+     * Extrai os dados básicos do product para inserção
      */
-    private static function extrairDadosProduto(Produto $produto): array {
+    private static function extractBasicData(Product $product): array {
         return [
-            $produto->getCodBarras(),
-            $produto->getNome(),
-            $produto->getQuantidade(),
-            $produto->getValidade(),
-            $produto->getEndereco()->getId()
+            $product->getCodBarras(),
+            $product->getNome(),
+            $product->getQuantidade(),
+            $product->getValidade(),
+            $product->getlocation()->getId()
         ];
     }
 
     /**
-     * Extrai os dados completos do produto para atualização
+     * Extrai os dados completos do product para atualização
      */
-    private static function extrairDadosProdutoCompleto(Produto $produto): array {
+    private static function extractData(Product $product): array {
         return [
-            $produto->getNome(),
-            $produto->getCodBarras(),
-            $produto->getQuantidade(),
-            $produto->getValidade(),
-            $produto->getEndereco()->getId(),
-            $produto->getIdProduto()
+            $product->getNome(),
+            $product->getCodBarras(),
+            $product->getQuantidade(),
+            $product->getValidade(),
+            $product->getlocation()->getId(),
+            $product->getIdproduct()
         ];
     }
 

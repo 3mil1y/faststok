@@ -1,31 +1,33 @@
 <?php
+namespace App\Core;
 
 class Router {
     public static function run() {
-        // Obtém a URL digitada pelo usuário
+        // Get URL entered by user
         $url = isset($_GET['url']) ? explode("/", filter_var(rtrim($_GET['url'], "/"), FILTER_SANITIZE_URL)) : [];
 
-        // Define controller e método padrão
-        $controller = isset($url[0]) && $url[0] != "" ? ucfirst($url[0]) . "Controller" : "HomeController";
-        $method = isset($url[1]) ? $url[1] : "index";
-        $params = array_slice($url, 2); // Pega os parâmetros extras da URL
+        // Define default controller and method
+        $controllerName = isset($url[0]) && $url[0] != "" ? ucfirst($url[0]) . "Controller" : "HomeController";
+        $methodName = isset($url[1]) ? $url[1] : "index";
+        $params = array_slice($url, 2); // Get extra URL parameters
 
-        // Caminho do controller
-        $controllerPath = "../app/controllers/" . $controller . ".php";
+        // Controller path
+        $controllerPath = "../app/controllers/" . $controllerName . ".php";
 
-        // Verifica se o controller existe
+        // Check if controller exists
         if (file_exists($controllerPath)) {
             require_once $controllerPath;
-            $obj = new $controller();
+            $controllerClass = "App\\Controllers\\" . $controllerName;
+            $controller = new $controllerClass();
 
-            // Verifica se o método existe no controller
-            if (method_exists($obj, $method)) {
-                call_user_func_array([$obj, $method], $params);
+            // Check if method exists in controller
+            if (method_exists($controller, $methodName)) {
+                call_user_func_array([$controller, $methodName], $params);
             } else {
-                echo "Erro 404 - Método '$method' não encontrado.";
+                throw new \Exception("Method '{$methodName}' not found in controller.");
             }
         } else {
-            echo "Erro 404 - Página não encontrada.";
+            throw new \Exception("Controller not found: {$controllerPath}");
         }
     }
 }

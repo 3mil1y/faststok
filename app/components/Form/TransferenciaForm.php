@@ -1,16 +1,24 @@
 <?php
-namespace Components\Form;
+namespace App\Components\Form;
 
-abstract class TransferenciaForm extends BaseForm {
-    protected static function createOptions(): array {
-        $setores = range('A', 'H');
-        $andares = range(1, 5);
-        $posicoes = range(1, 12);
-
-        $opcoesSetor = self::gerarOpcoes($setores, 'Selecione um setor');
-        $opcoesAndar = self::gerarOpcoes($andares, 'Selecione um andar');
-        $opcoesPosicao = self::gerarOpcoes($posicoes, 'Selecione uma posição');
-
-        return compact("opcoesSetor", "opcoesAndar", "opcoesPosicao");
+abstract class TransferForm extends BaseForm {
+    protected static function createLocationOptions(): array {
+        return [
+            'sectors' => array_combine(range('A', 'H'), range('A', 'H')),
+            'floors' => array_combine(range(1, 5), range(1, 5)),
+            'positions' => array_combine(range(1, 12), range(1, 12))
+        ];
     }
-} 
+
+    protected static function validateLocation(array $location): bool {
+        $sectors = range('A', 'H');
+        $floors = range(1, 5);
+        $positions = range(1, 12);
+
+        return in_array($location['sector'], $sectors) &&
+               in_array($location['floor'], $floors) &&
+               in_array($location['position'], $positions);
+    }
+
+    abstract public static function render(string $action, array $params = []): string;
+}

@@ -1,23 +1,43 @@
 <?php
 
-namespace core;
+namespace App\Core;
+
+use App\Components\Layout\Layout;
+use App\Components\Message\Message;
 
 abstract class Controller {
-    protected function view(string $view, array $dados = []) {
-        extract($dados); // Transforma os índices do array em variáveis
-        require_once "../app/views/$view.php";
+    protected function view(string $view, array $data = []): void {
+        extract($data);
+        
+        //ob_start();
+        include_once "../app/views/{$view}.php";
+       // $content = ob_get_clean();
+        
+        //echo Layout::render($data['title'] ?? 'FastStok', $content);
     }
 
     protected function redirect(string $url) {
-        header("Location: $url");
+        header("Location: $this->getBaseUrl() . $url");
         exit;
     }
 
-    protected function loadModel(string $model) {
-        require_once "../app/models/$model.php";
+    protected function redirectWithSuccess(string $url, string $title, string $content = ''): void {
+        $this->redirect($url, 'success', $title, $content);
     }
 
-    protected function getBaseUrl() {
+    protected function redirectWithError(string $url, string $title, string $content = ''): void {
+        $this->redirect($url, 'error', $title, $content);
+    }
+
+    protected function redirectWithWarning(string $url, string $title, string $content = ''): void {
+        $this->redirect($url, 'warning', $title, $content);
+    }
+
+    protected function redirectWithInfo(string $url, string $title, string $content = ''): void {
+        $this->redirect($url, 'info', $title, $content);
+    }
+
+    protected function getBaseUrl(): string {
         return "http://" . $_SERVER['HTTP_HOST'] . "/test/";
     }
 
@@ -32,46 +52,4 @@ abstract class Controller {
     protected function isGet(): bool {
         return $_SERVER['REQUEST_METHOD'] === 'GET';
     }
-    
-    // protected function loadComponent(string $component) {
-    //     require_once "../app/components/$component.php";
-    // }
-
-    // protected function loadHelper(string $helper) {
-    //     require_once "../app/helpers/$helper.php";
-    // }
-
-    // protected function loadConfig(string $config) {
-    //     require_once "../app/config/$config.php";
-    // }
-
-    // protected function loadLibrary(string $library) {
-    //     require_once "../app/libraries/$library.php";
-    // }
-
-    // protected function loadMiddleware(string $middleware) {
-    //     require_once "../app/middlewares/$middleware.php";
-    // }
-
-    // protected function loadRoute(string $route) {
-    //     require_once "../app/routes/$route.php";
-    // }
-
-    // protected function loadService(string $service) {
-    //     require_once "../app/services/$service.php";
-    // }
-    
-    // protected function loadUtil(string $util) {
-    //     require_once "../app/utils/$util.php";
-    // }
-
-    // protected function loadValidator(string $validator) {
-    //     require_once "../app/validators/$validator.php";
-    // }
-
-    // protected function loadException(string $exception) {
-    //     require_once "../app/exceptions/$exception.php";
-    // }
-
-   
 }

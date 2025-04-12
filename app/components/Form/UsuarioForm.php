@@ -1,7 +1,9 @@
 <?php
-namespace Components\Form;
+namespace App\Components\Form;
 
-class UsuarioForm {
+use App\Entities\User;
+
+class UserForm extends BaseForm {
     private const CLASSES = [
         'container' => 'max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg',
         'header' => 'mb-8 text-center',
@@ -19,61 +21,75 @@ class UsuarioForm {
         'error' => 'mt-2 text-sm text-red-600'
     ];
 
-    public static function render(array $usuario = null): string {
-        $nome = $usuario['nome'] ?? '';
-        $email = $usuario['email'] ?? '';
-        $senha = $usuario['senha'] ?? '';
-        $tipo = $usuario['tipo'] ?? '';
+    public static function render(string $action, array $params = []): string {
+        $user = $params['user'] ?? null;
+        $title = $user ? 'Editar Usuário' : 'Novo Usuário';
+        $roles = [
+            'user' => 'Usuário',
+            'admin' => 'Administrador'
+        ];
 
         return "
-            <div class='" . self::CLASSES['container'] . "'>
-                <div class='" . self::CLASSES['header'] . "'>
-                    <h2 class='" . self::CLASSES['title'] . "'>Cadastro de Usuário</h2>
-                    <p class='" . self::CLASSES['subtitle'] . "'>Preencha os dados do usuário abaixo</p>
+        <form action='{$action}' method='POST' class='" . self::CLASSES['form'] . "'>
+            <h2 class='" . self::CLASSES['title'] . "'>{$title}</h2>
+
+            " . ($user ? "<input type='hidden' name='id' value='{$user->getId()}'>" : "") . "
+
+            <div class='" . self::CLASSES['section'] . "'>
+                <div class='" . self::CLASSES['grid'] . "'>
+                    " . self::generateTextInput('name', 'Nome',
+                        $user ? $user->getName() : '',
+                        ['required' => true]
+                    ) . "
+                    
+                    " . self::generateTextInput('email', 'Email',
+                        $user ? $user->getEmail() : '',
+                        [
+                            'type' => 'email',
+                            'required' => true
+                        ]
+                    ) . "
+                    
+                    " . self::generateTextInput('password', 'Senha',
+                        '',
+                        [
+                            'type' => 'password',
+                            'required' => !$user,
+                            'minlength' => '6',
+                            'placeholder' => $user ? 'Deixe em branco para manter a senha atual' : ''
+                        ]
+                    ) . "
+                    
+                    " . self::generateSelect('role', 'Tipo de Usuário',
+                        $roles,
+                        $user ? $user->getRole() : 'user',
+                        ['required' => true]
+                    ) . "
                 </div>
+            </div>
 
-                <form class='" . self::CLASSES['form'] . "' action='/usuario/salvar' method='POST'>
-                    <div class='" . self::CLASSES['form_group'] . "'>
-                        <div class='" . self::CLASSES['input_group'] . "'>
-                            <label for='nome' class='" . self::CLASSES['label'] . "'>Nome Completo</label>
-                            <input type='text' id='nome' name='nome' value='{$nome}' required 
-                                class='" . self::CLASSES['input'] . "' 
-                                placeholder='Digite o nome completo' />
-                        </div>
-
-                        <div class='" . self::CLASSES['input_group'] . "'>
-                            <label for='email' class='" . self::CLASSES['label'] . "'>E-mail</label>
-                            <input type='email' id='email' name='email' value='{$email}' required 
-                                class='" . self::CLASSES['input'] . "' 
-                                placeholder='Digite o e-mail' />
-                        </div>
-
-                        <div class='" . self::CLASSES['input_group'] . "'>
-                            <label for='senha' class='" . self::CLASSES['label'] . "'>Senha</label>
-                            <input type='password' id='senha' name='senha' value='{$senha}' required 
-                                class='" . self::CLASSES['input'] . "' 
-                                placeholder='Digite a senha' />
-                        </div>
-
-                        <div class='" . self::CLASSES['input_group'] . "'>
-                            <label for='tipo' class='" . self::CLASSES['label'] . "'>Tipo de Usuário</label>
-                            <select id='tipo' name='tipo' required class='" . self::CLASSES['select'] . "'>
-                                <option value=''>Selecione o tipo</option>
-                                <option value='admin'" . ($tipo === 'admin' ? ' selected' : '') . ">Administrador</option>
-                                <option value='usuario'" . ($tipo === 'usuario' ? ' selected' : '') . ">Usuário</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class='" . self::CLASSES['button_group'] . "'>
-                        <button type='button' onclick='window.history.back()' class='" . self::CLASSES['button_secondary'] . "'>
-                            Cancelar
-                        </button>
-                        <button type='submit' class='" . self::CLASSES['button_primary'] . "'>
-                            Salvar Usuário
-                        </button>
-                    </div>
-                </form>
-            </div>";
+            <div class='" . self::CLASSES['button_group'] . "'>
+                <a href='/user/list' 
+                   class='" . self::CLASSES['button'] . " " . self::CLASSES['button_secondary'] . "'>
+                    Cancelar
+                </a>
+                <button type='submit' 
+                        class='" . self::CLASSES['button'] . " " . self::CLASSES['button_primary'] . "'>
+                    " . ($user ? 'Atualizar' : 'Criar') . " Usuário
+                </button>
+            </div>
+        </form>
+        
+        <script>
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const password = document.querySelector('input[name=password]');
+                const isEdit = document.querySelector('input[name=id]') !== null;
+                
+                if (!isEdit && password.value.length < 6) {
+                    e.preventDefault();
+                    alert('A senha deve ter no mínimo 6 caracteres');
+                }
+            });
+        </script>";
     }
-} 
+}

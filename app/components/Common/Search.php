@@ -1,10 +1,13 @@
 <?php
-namespace Components\Common;
+namespace App\Components\Common;
 
 use Produto\Produto;
 use Endereco\Endereco;
 
-class Pesquisa {
+// Needs refactoring to remove the commented code and unused imports
+// and to follow PSR standards for class names and namespaces.
+
+class Search {
     private const CLASSES = [
         'container' => 'flex items-center justify-center min-h-screen bg-gray-200',
         'form_container' => 'p-4 bg-white rounded-2xl shadow-lg w-full max-w-md',

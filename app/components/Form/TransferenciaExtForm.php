@@ -1,63 +1,99 @@
 <?php
-namespace Components\Form;
+namespace App\Components\Form;
 
-class TransferenciaExtForm extends TransferenciaForm {
-    protected static function gerarCampoSelect(string $id, string $label, string $opcoes): string {
-        return "<div>
-            <label for='{$id}' class='" . self::CLASSES['label'] . "'>{$label}:</label>
-            <select id='{$id}' name='{$id}' required class='" . self::CLASSES['select'] . "'>
-                {$opcoes}
-            </select>
-        </div>";
-    }
+use App\Entities\Product;
 
-    private static function gerarGrupoSelecao(string $prefixo, string $titulo, array $opcoes): string {
-        return "<div class='" . self::CLASSES['grid'] . "'>
-            " . self::gerarCampoSelect($prefixo . 'Setor', $titulo . ' Setor', $opcoes['opcoesSetor']) . "
-            " . self::gerarCampoSelect($prefixo . 'Andar', $titulo . ' Andar', $opcoes['opcoesAndar']) . "
-            " . self::gerarCampoSelect($prefixo . 'Posicao', $titulo . ' Posição', $opcoes['opcoesPosicao']) . "
-        </div>";
-    }
-
+class ExternalTransferForm extends TransferForm {
     public static function render(string $action, array $params = []): string {
-        $opcoes = self::createOptions();
-
-        return "<form action='{$action}' method='post' class='" . self::CLASSES['form'] . "'>
-            <h1 class='" . self::CLASSES['titulo'] . "'>Transferir Endereço</h1>
-
-            " . self::gerarGrupoSelecao('origem', 'Origem', $opcoes) . "
-
-            <button type='submit' class='" . self::CLASSES['button'] . "'>Transferir Produto</button>
-        </form>";
-    }
-}
-
-/* Código original
-namespace Components;
-
-use Components\FormTransferencia;
-
-class FormTransferenciaExt extends FormTransferencia{
-    public static function gerar($action) {
-        $opcoes = FormTransferenciaExt::createOptions();
+        $options = self::createLocationOptions();
 
         return "
-        <form action='{$action}' method='post' class='w-1/2 mx-auto my-6 space-y-6'>
-            <h1 class='text-3xl font-semibold text-center mb-6'>Transferir Endereço</h1>
+        <form action='{$action}' method='POST' class='" . self::CLASSES['form'] . "'>
+            <h2 class='" . self::CLASSES['title'] . "'>Transferência Externa de Produtos</h2>
+            
+            <div class='" . self::CLASSES['section'] . "'>
+                <h3 class='" . self::CLASSES['section_title'] . "'>Localização do Produto</h3>
+                <div class='" . self::CLASSES['grid'] . "'>
+                    " . self::generateSelect('sector', 'Setor',
+                        $options['sectors'],
+                        '',
+                        ['required' => true]
+                    ) . "
+                    
+                    " . self::generateSelect('floor', 'Andar',
+                        $options['floors'],
+                        '',
+                        ['required' => true]
+                    ) . "
+                    
+                    " . self::generateSelect('position', 'Posição',
+                        $options['positions'],
+                        '',
+                        ['required' => true]
+                    ) . "
+                </div>
+                <p class='" . self::CLASSES['hint'] . "'>Selecione a localização do produto a ser transferido</p>
+            </div>
 
-            <div class='grid grid-cols-3 gap-4'>
-                <div>
-                    <label for='setor' class='block text-sm font-medium text-gray-700'>Setor:</label>
-                    <select id='setor' name='setor' required class='mt-1 p-2 block w-full border border-gray-300 rounded-md'>
-                        {$opcoes['opcoesSetor']}
-                    </select>
+            <div class='" . self::CLASSES['section'] . "'>
+                <h3 class='" . self::CLASSES['section_title'] . "'>Informações da Transferência</h3>
+                <div class='space-y-4'>
+                    " . self::generateTextInput('destination', 'Destino',
+                        '',
+                        [
+                            'required' => true,
+                            'placeholder' => 'Nome da empresa ou local de destino'
+                        ]
+                    ) . "
+                    
+                    " . self::generateTextInput('responsible', 'Responsável',
+                        '',
+                        [
+                            'required' => true,
+                            'placeholder' => 'Nome do responsável pelo recebimento'
+                        ]
+                    ) . "
+
+                    " . self::generateTextInput('quantity', 'Quantidade',
+                        '',
+                        [
+                            'type' => 'number',
+                            'min' => '1',
+                            'required' => true,
+                            'placeholder' => 'Quantidade a ser transferida'
+                        ]
+                    ) . "
+                    
+                    " . self::generateTextarea('notes', 'Observações',
+                        '',
+                        [
+                            'placeholder' => 'Informações adicionais sobre a transferência'
+                        ]
+                    ) . "
                 </div>
-                <div>
-                    <label for='andar' class='block text-sm font-medium text-gray-700'>Andar:</label>
-                    <select id='andar' name='andar' required class='mt-1 p-2 block w-full border border-gray-300 rounded-md'>
-                        {$opcoes['opcoesAndar']}
-                    </select>
-                </div>
-                <div>
-                    <label for='posicao'
-                    */
+            </div>
+
+            <div class='" . self::CLASSES['button_group'] . "'>
+                <a href='/transfer' 
+                   class='" . self::CLASSES['button'] . " " . self::CLASSES['button_secondary'] . "'>
+                    Cancelar
+                </a>
+                <button type='submit' 
+                        class='" . self::CLASSES['button'] . " " . self::CLASSES['button_primary'] . "'>
+                    Realizar Transferência Externa
+                </button>
+            </div>
+        </form>
+        
+        <script>
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const quantity = parseInt(document.querySelector('input[name=quantity]').value);
+                
+                if (quantity <= 0) {
+                    e.preventDefault();
+                    alert('A quantidade deve ser maior que zero.');
+                }
+            });
+        </script>";
+    }
+}

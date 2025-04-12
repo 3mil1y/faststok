@@ -1,10 +1,7 @@
 <?php
+namespace App\Components\Layout;
 
-
-
-namespace Components\Layout;
-
-class Cabecalho {
+class Header {
     private const CLASSES = [
         'header' => 'bg-gradient-to-r from-gray-800 to-gray-900 text-white p-4 shadow-md',
         'header_container' => 'max-w-7xl mx-auto flex justify-between items-center flex-wrap',
@@ -29,11 +26,11 @@ class Cabecalho {
         'usuario' => 'text-white px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm'
     ];
 
-    private static function gerarLogo(): string {
+    private static function generateLogo(): string {
         return "
             <div class='" . self::CLASSES['logo_container'] . "'>
                 <div class='" . self::CLASSES['logo_text'] . "'>
-                <a href='produto/listar'>
+                <a href='product/home'>
                 <svg class='" . self::CLASSES['logo_icon'] . "' xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
                         <path d='M20 7h-3a2 2 0 0 1-2-2V2'></path>
                         <path d='M9 2v3a2 2 0 0 1-2 2H4'></path>
@@ -44,7 +41,7 @@ class Cabecalho {
                         <path d='M4 20h3a2 2 0 0 0 2-2v-3'></path>
                     </svg>
                     </a>
-                    <a href='produto/listar'>
+                    <a href='product/home'>
                     <span>FastStok</span>
                     
                 </a>
@@ -52,7 +49,7 @@ class Cabecalho {
             </div>";
     }
 
-    private static function gerarDropdowns(): string {
+    private static function generateDropdowns(): string {
         return "
             <div class='hidden md:flex items-center space-x-4'>
                 <!-- Endereçamento Dropdown -->
@@ -72,8 +69,8 @@ class Cabecalho {
                         Relatórios
                     </button>
                     <div id='relatoriosDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
-                        <a href='relatorio/validade' class='" . self::CLASSES['dropdown_item'] . "'>Validade</a>
-                        <a href='relatorio/estoque' class='" . self::CLASSES['dropdown_item'] . "'>Baixo Estoque</a>
+                        <a href='report/expiry' class='" . self::CLASSES['dropdown_item'] . "'>Validade</a>
+                        <a href='report/stock' class='" . self::CLASSES['dropdown_item'] . "'>Baixo Estoque</a>
                     </div>
                 </div>
 
@@ -94,8 +91,8 @@ class Cabecalho {
                         Alterações
                     </button>
                     <div id='adminDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
-                        <a href='usuario/listar' class='" . self::CLASSES['dropdown_item'] . "'>Listar Usuários</a>
-                        <a href='usuario/cadastrar' class='" . self::CLASSES['dropdown_item'] . "'>Adicionar Usuário</a>
+                        <a href='admin/list' class='" . self::CLASSES['dropdown_item'] . "'>Listar Usuários</a>
+                        <a href='admin/createUser' class='" . self::CLASSES['dropdown_item'] . "'>Adicionar Usuário</a>
                     </div>
                 </div>
 
@@ -138,7 +135,7 @@ class Cabecalho {
             </script>";
     }
 
-    private static function gerarMenuMobile(): string {
+    private static function generateMobileMenu(): string {
         return "
             <button id='mobile-menu-button' class='" . self::CLASSES['mobile_menu_button'] . "' aria-label='Menu'>
                 <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
@@ -150,7 +147,7 @@ class Cabecalho {
             <div id='mobile-menu' class='" . self::CLASSES['mobile_menu'] . "'>
                 <a href='/produto/home' class='" . self::CLASSES['mobile_menu_item'] . "'>Home</a>
                 <a href='/produto/listar' class='" . self::CLASSES['mobile_menu_item'] . "'>Produtos</a>
-                <a href='/produto/cadastrar' class='" . self::CLASSES['mobile_menu_item'] . "'>Cadastrar Produto</a>
+                <a href='/product/create' class='" . self::CLASSES['mobile_menu_item'] . "'>Cadastrar Produto</a>
                 <a href='/produto/pesquisar' class='" . self::CLASSES['mobile_menu_item'] . "'>Pesquisar</a>
                 <a href='/relatorio/validade' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Validade</a>
                 <a href='/relatorio/estoque' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
@@ -171,9 +168,9 @@ class Cabecalho {
         return "
             <header class='" . self::CLASSES['header'] . "'>
                 <div class='" . self::CLASSES['header_container'] . "'>
-                    " . self::gerarLogo() . "
-                    " . self::gerarMenuMobile() . "
-                    " . self::gerarDropdowns() . "
+                    " . self::generateLogo() . "
+                    " . self::generateMobileMenu() . "
+                    " . self::generateDropdowns() . "
                 </div>
             </header>";
     }

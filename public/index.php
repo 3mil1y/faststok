@@ -2,8 +2,9 @@
 require_once "../app/core/autoloader.php"; // Autoload das classes
 require_once "../app/core/Router.php";   // Roteador
 
-use core\dbConfig;
+use App\Core\DatabaseConfig;
+use App\Core\Router;
 
-DbConfig::init();
+DatabaseConfig::init();
 Router::run();
 ?>

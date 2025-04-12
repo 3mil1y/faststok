@@ -1,7 +1,9 @@
 <?php
-namespace Components\Table;
+namespace App\Components\Table;
 
-class UsuarioTable {
+use App\Entities\User;
+
+class UserTable {
     private const CLASSES = [
         'container' => 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8',
         'header' => 'sm:flex sm:items-center sm:justify-between mb-6',
@@ -13,29 +15,25 @@ class UsuarioTable {
         'table_inner' => 'inline-block min-w-full py-2 align-middle md:px-6 lg:px-8',
         'table' => 'min-w-full divide-y divide-gray-300',
         'thead' => 'bg-gray-50',
-        'th' => 'px-3 py-3.5 text-left text-sm font-semibold text-gray-900',
+        'th' => 'py-3.5 px-3 text-left text-sm font-semibold text-gray-900',
         'tbody' => 'divide-y divide-gray-200 bg-white',
-        'tr' => 'hover:bg-gray-50',
-        'td' => 'whitespace-nowrap px-3 py-4 text-sm text-gray-500',
-        'actions_cell' => 'whitespace-nowrap px-3 py-4 text-sm text-gray-500',
-        'action_button' => 'text-blue-600 hover:text-blue-900 mr-3',
-        'delete_button' => 'text-red-600 hover:text-red-900',
-        'empty_state' => 'text-center py-12',
-        'empty_state_text' => 'text-gray-500 text-sm',
-        'badge_admin' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800',
-        'badge_user' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
+        'td' => 'whitespace-nowrap py-4 px-3 text-sm text-gray-500',
+        'row_actions' => 'flex items-center space-x-2',
+        'action_button' => 'text-sm text-gray-500 hover:text-gray-700',
+        'action_button_edit' => 'text-blue-600 hover:text-blue-800',
+        'action_button_delete' => 'text-red-600 hover:text-red-800',
+        'badge' => 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+        'badge_admin' => 'bg-green-100 text-green-800',
+        'badge_user' => 'bg-gray-100 text-gray-800'
     ];
 
-    public static function render(array $usuarios = []): string {
+    public static function render(array $users): string {
         return "
             <div class='" . self::CLASSES['container'] . "'>
                 <div class='" . self::CLASSES['header'] . "'>
-                    <h1 class='" . self::CLASSES['title'] . "'>Usuários</h1>
+                    <h1 class='" . self::CLASSES['title'] . "'>Lista de Usuários</h1>
                     <div class='" . self::CLASSES['actions'] . "'>
-                        <a href='/usuario/cadastrar' class='" . self::CLASSES['button_primary'] . "'>
-                            <svg class='-ml-1 mr-2 h-5 w-5' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'>
-                                <path fill-rule='evenodd' d='M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z' clip-rule='evenodd' />
-                            </svg>
+                        <a href='/user/create' class='" . self::CLASSES['button_primary'] . "'>
                             Novo Usuário
                         </a>
                     </div>
@@ -47,14 +45,14 @@ class UsuarioTable {
                             <table class='" . self::CLASSES['table'] . "'>
                                 <thead class='" . self::CLASSES['thead'] . "'>
                                     <tr>
-                                        <th scope='col' class='" . self::CLASSES['th'] . "'>Nome</th>
-                                        <th scope='col' class='" . self::CLASSES['th'] . "'>E-mail</th>
-                                        <th scope='col' class='" . self::CLASSES['th'] . "'>Tipo</th>
-                                        <th scope='col' class='" . self::CLASSES['th'] . "'>Ações</th>
+                                        <th class='" . self::CLASSES['th'] . "'>Nome</th>
+                                        <th class='" . self::CLASSES['th'] . "'>Email</th>
+                                        <th class='" . self::CLASSES['th'] . "'>Tipo</th>
+                                        <th class='" . self::CLASSES['th'] . "'>Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class='" . self::CLASSES['tbody'] . "'>" .
-                                    self::gerarLinhasTabela($usuarios) . "
+                                <tbody class='" . self::CLASSES['tbody'] . "'>
+                                    " . self::generateTableRows($users) . "
                                 </tbody>
                             </table>
                         </div>
@@ -63,42 +61,32 @@ class UsuarioTable {
             </div>";
     }
 
-    private static function gerarLinhasTabela(array $usuarios): string {
-        if (empty($usuarios)) {
-            return "
-                <tr>
-                    <td colspan='4' class='" . self::CLASSES['empty_state'] . "'>
-                        <p class='" . self::CLASSES['empty_state_text'] . "'>Nenhum usuário encontrado</p>
-                    </td>
-                </tr>";
-        }
+    private static function generateTableRows(array $users): string {
+        $rows = '';
+        foreach ($users as $user) {
+            $roleBadgeClass = $user->isAdmin() ? self::CLASSES['badge_admin'] : self::CLASSES['badge_user'];
+            $roleText = $user->isAdmin() ? 'Administrador' : 'Usuário';
 
-        $linhas = '';
-        foreach ($usuarios as $usuario) {
-            $badge_class = $usuario['tipo'] === 'admin' ? self::CLASSES['badge_admin'] : self::CLASSES['badge_user'];
-            $badge_text = $usuario['tipo'] === 'admin' ? 'Administrador' : 'Usuário';
-
-            $linhas .= "
-                <tr class='" . self::CLASSES['tr'] . "'>
-                    <td class='" . self::CLASSES['td'] . "'>{$usuario['nome']}</td>
-                    <td class='" . self::CLASSES['td'] . "'>{$usuario['email']}</td>
-                    <td class='" . self::CLASSES['td'] . "'>
-                        <span class='" . $badge_class . "'>{$badge_text}</span>
-                    </td>
-                    <td class='" . self::CLASSES['actions_cell'] . "'>
-                        <a href='/usuario/editar/{$usuario['id']}' class='" . self::CLASSES['action_button'] . "'>
-                            <svg class='h-5 w-5' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'>
-                                <path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
-                            </svg>
+            $rows .= "<tr>
+                <td class='" . self::CLASSES['td'] . "'>{$user->getName()}</td>
+                <td class='" . self::CLASSES['td'] . "'>{$user->getEmail()}</td>
+                <td class='" . self::CLASSES['td'] . "'>
+                    <span class='" . self::CLASSES['badge'] . " {$roleBadgeClass}'>
+                        {$roleText}
+                    </span>
+                </td>
+                <td class='" . self::CLASSES['td'] . "'>
+                    <div class='" . self::CLASSES['row_actions'] . "'>
+                        <a href='/user/edit/{$user->getId()}' class='" . self::CLASSES['action_button_edit'] . "'>
+                            Editar
                         </a>
-                        <a href='/usuario/excluir/{$usuario['id']}' class='" . self::CLASSES['delete_button'] . "' onclick='return confirm(\"Tem certeza que deseja excluir este usuário?\")'>
-                            <svg class='h-5 w-5' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'>
-                                <path fill-rule='evenodd' d='M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z' clip-rule='evenodd' />
-                            </svg>
-                        </a>
-                    </td>
-                </tr>";
+                        <button onclick='confirmDeleteUser({$user->getId()})' class='" . self::CLASSES['action_button_delete'] . "'>
+                            Excluir
+                        </button>
+                    </div>
+                </td>
+            </tr>";
         }
-        return $linhas;
+        return $rows;
     }
-} 
+}
