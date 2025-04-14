@@ -8,5 +8,5 @@ use App\Models\ProductModel;
 
 echo Head::render($title);
 echo Header::render();
-echo DecreaseProduct::render("validations/decreaseProduct", ["product" => $product]);
+echo DecreaseProduct::render($action, ["product" => $product]);
 ?>

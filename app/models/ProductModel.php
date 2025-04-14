@@ -3,7 +3,7 @@ namespace App\Models;
 
 use App\Entities\Product;
 use App\Entities\Location;
-use App\Core\Database;
+use App\Core\Database\Database;
 use Exception;
 
 class ProductModel {
@@ -93,7 +93,7 @@ class ProductModel {
             $sql = "SELECT product.*, location.* 
                     FROM product
                     INNER JOIN location ON product.location_id = location.id
-                    WHERE product.id = ?";
+                    WHERE product.product_id = ?";
             
             $params = [$id];
             $result = Database::executePrepared($sql, "i", $params);
@@ -133,13 +133,61 @@ class ProductModel {
     }
 
     /**
+     * Get products by name
+     */
+    public static function getByName(string $name): array {
+        try {
+            $sql = "SELECT product.*, location.* 
+                    FROM product
+                    INNER JOIN location ON product.location_id = location.id
+                    WHERE product.name LIKE ?";
+            
+            $params = ["%$name%"];
+            $result = Database::executePrepared($sql, "s", $params);
+            
+            $products = [];
+            while ($row = $result->fetch_assoc()) {
+                $products[] = self::mapToProduct($row);
+            }
+            
+            return $products;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao listar produtos pelo nome: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get products by location
+     */
+    public static function getByLocationId(int $locationId): array {
+        try {
+            $sql = "SELECT product.*, location.* 
+                    FROM product
+                    INNER JOIN location ON product.location_id = location.id
+                    WHERE product.location_id = ?";
+            
+            //$params = [$locationId];
+            $result = Database::executePrepared($sql, "i", [$locationId]);
+            
+            $products = [];
+            while ($row = $result->fetch_assoc()) {
+                $products[] = self::mapToProduct($row);
+            }
+            
+            return $products;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao listar produtos pelo endereço: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Update product
      */
     public static function update(Product $product): bool {
         try {
             $sql = "UPDATE product 
                     SET name = ?, barcode = ?, quantity = ?, expiry_date = ?, location_id = ?
-                    WHERE id = ?";
+                    WHERE product_id = ?";
             
             $params = self::extractData($product);
             
@@ -152,13 +200,47 @@ class ProductModel {
     }
 
     /**
+     * Update all products in a location
+     */
+
+    public static function updateAllLocations($originLocationId, $destinationLocationId): bool {
+        try {
+            $sql = "UPDATE product SET location_id = ? WHERE location_id = ?";
+            
+            $params = [$destinationLocationId, $originLocationId];
+            
+            Database::executePrepared($sql, "ii", $params);
+            
+            return true;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao atualizar produto: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Delete product
      */
     public static function delete(int $id): bool {
         try {
-            $sql = "DELETE FROM product WHERE id = ?";
-            $params = [$id];
-            Database::executePrepared($sql, "i", $params);
+            $sql = "DELETE FROM product WHERE product_id = ?";
+            //$params = [$id];
+            Database::executePrepared($sql, "i", [$id]);
+            
+            return true;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao excluir produto: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete product by location id
+     */
+
+    public static function deleteByLocationId(int $locationId): bool {
+        try {
+            $sql = "DELETE FROM product WHERE location_id = ?";
+            //$params = [$locationId];
+            Database::executePrepared($sql, "i", [$locationId]);
             
             return true;
         } catch (Exception $e) {
@@ -170,14 +252,14 @@ class ProductModel {
      * Map database result to Product object
      */
     private static function mapToProduct(array $row): Product {
-        $location = new Location($row['sector'], $row['floor'], $row['position'], $row['id']);
+        $location = new Location($row['sector'], $row['floor'], $row['position'], $row['location_id']);
         return new Product(
             $row['barcode'],
             $row['name'],
             $row['quantity'],
             $row['expiry_date'],
             $location,
-            $row['id']
+            $row['product_id']
         );
     }
 

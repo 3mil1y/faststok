@@ -1,5 +1,5 @@
 <?php
-namespace App\Core;
+namespace App\Core\Database;
 
 use mysqli;
 use Exception;
@@ -11,10 +11,10 @@ class Database {
         if (self::$connection === null) {
             try {
                 self::$connection = new mysqli(
-                    DatabaseConfig::HOST,
-                    DatabaseConfig::USER,
-                    DatabaseConfig::PASS,
-                    DatabaseConfig::DB
+                    DatabaseConfig::getHost(),
+                    DatabaseConfig::getUser(),
+                    DatabaseConfig::getPass(),
+                    DatabaseConfig::getDB()
                 );
                 
                 if (self::$connection->connect_error) {

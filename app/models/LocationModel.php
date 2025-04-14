@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
 
-use App\Core\Database;
+use App\Core\Database\Database;
 use App\Entities\Location;
 use Exception;
 
@@ -88,6 +88,23 @@ class LocationModel {
             }
             
             return self::create($location) ? $location : null;
+        } catch (Exception $e) {
+            throw new Exception("Error finding location: " . $e->getMessage());
+        }
+    }
+
+    public static function findIdByData(Location $location): ?int {
+        try {
+            $sql = "SELECT id FROM location WHERE sector = ? AND floor = ? AND position = ?";
+            $params = [
+                $location->getSector(),
+                $location->getFloor(),
+                $location->getPosition()
+            ];
+            
+            $result = Database::executePrepared($sql, "sii", $params);
+            
+            return $result->fetch_assoc()['id'] ?? null;
         } catch (Exception $e) {
             throw new Exception("Error finding location: " . $e->getMessage());
         }

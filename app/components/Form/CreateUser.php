@@ -22,7 +22,7 @@ class CreateUser {
     private static function generateCheckbox(): string {
         return "
             <label class='" . self::CLASSES['checkbox_label'] . "'>
-                <input type='checkbox' name='is_admin' value='1' 
+                <input type='checkbox' name='role' value='1' 
                        class='" . self::CLASSES['checkbox'] . "'/>
                 <span>Tornar usuário administrador</span>
             </label>";
@@ -42,7 +42,7 @@ class CreateUser {
                 {$errorMessage}
                 <form action='{$action}' method='post'>
                     " . self::generateInput('text', 'login', 'Nome de usuário') . "
-                    " . self::generateInput('password', 'senha', 'Senha') . "
+                    " . self::generateInput('password', 'password', 'Senha') . "
                     " . self::generateCheckbox() . "
                     <button type='submit' class='" . self::CLASSES['button'] . "'>Cadastrar</button>
                 </form>

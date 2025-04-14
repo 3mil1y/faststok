@@ -28,8 +28,8 @@ class EditUser{
 
     private static function generateSelectField(string $id, string $label, string $selectedValue): string {
         $options = [
-            'admin' => 'Admin',
-            'usuario' => 'Usuário'
+            'admin' => 'Administrador',
+            'user' => 'Usuário'
         ];
         
         $optionsHtml = '';
@@ -49,7 +49,7 @@ class EditUser{
     public static function render(string $action, User $user = null): string {
         $login = $user ? $user->getLogin() : '';
         $id = $user ? $user->getId() : '';
-        $role = $user ? $user->getRole() : '';
+        $role = $user->isAdmin() ? 'admin' : 'user';
 
         return "<form action='{$action}' method='post' class='" . self::CLASSES['form'] . "'>
             <h1 class='" . self::CLASSES['title'] . "'>Altere um Usuário</h1>

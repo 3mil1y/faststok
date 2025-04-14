@@ -2,14 +2,14 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\ProdutoModel;
+use App\Models\ProductModel;
 
 class ReportController extends Controller {
     public function expiry() {
         $title = "Relatório de Validade";
 
         // Fetch products that are about to expire
-        $products = ProdutoModel::listByExpiry() ?? [];
+        $products = ProductModel::getByExpiryDate() ?? [];
         $action = '';
 
         $this->view("report", compact("title", "products", "action"));
@@ -19,7 +19,7 @@ class ReportController extends Controller {
         $title = "Relatório de Estoque";
 
         // Fetch products that are low in stock
-        $products = ProdutoModel::listByStock() ?? [];
+        $products = ProductModel::getByLowStock() ?? [];
         $action = '';
 
         $this->view("report", compact("title", "products", "action"));

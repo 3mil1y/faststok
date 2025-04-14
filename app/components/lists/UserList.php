@@ -72,11 +72,49 @@ class UserList {
         <div class='" . self::CLASSES['container'] . "'>
             {$cards}
         </div>
+        <div id='deleteUserPopup' class='hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-40'>
+            <div class='fixed inset-0 z-50 overflow-y-auto'>
+                <div class='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+                    <div class='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+                        <div class='bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
+                            <div class='sm:flex sm:items-start'>
+                                <div class='mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10'>
+                                    <svg class='h-6 w-6 text-red-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'/>
+                                    </svg>
+                                </div>
+                                <div class='mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left'>
+                                    <h3 class='text-lg font-medium leading-6 text-gray-900'>Excluir Usuário</h3>
+                                    <div class='mt-2'>
+                                        <p class='text-sm text-gray-500'>Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <form id='deleteUserForm' method='POST' class='bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6'>
+                            <input type='hidden' name='userId' id='deleteUserId'>
+                            <button type='submit' class='" . self::CLASSES['button'] . " " . self::CLASSES['button_danger'] . "'>
+                                Excluir
+                            </button>
+                            <button type='button' onclick='hideDeleteUserPopup()' class='" . self::CLASSES['button'] . " bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:ml-3'>
+                                Cancelar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script>
             function confirmDeleteUser(id) {
-                if (confirm('Tem certeza que deseja excluir este usuário?')) {
-                    window.location.href = '/user/delete/' + id;
-                }
+                document.getElementById('deleteUserId').value = id;
+                document.getElementById('deleteUserPopup').classList.remove('hidden');
+                document.getElementById('deleteUserForm').action = 'admin/deleteUser/' + id;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hideDeleteUserPopup() {
+                document.getElementById('deleteUserPopup').classList.add('hidden');
+                document.body.style.overflow = '';
             }
         </script>";
     }

@@ -1,10 +1,10 @@
 <?php
 namespace App\Components\Common;
 
-use Produto\Produto;
-use Endereco\Endereco;
+use App\entities\Product;
+use App\entities\Location;
 
-// Needs refactoring to remove the commented code and unused imports
+// Needs refactoring to remove the commented code and unused
 // and to follow PSR standards for class names and namespaces.
 
 class Search {
@@ -20,9 +20,9 @@ class Search {
 
     private static function gerarSelectTipoPesquisa(): string {
         return "<select class='" . self::CLASSES['select'] . "' name='searchType'>
-            <option value='nome'>Nome do Produto</option>
-            <option value='codBarras'>Código de Barras</option>
-            <option value='endereco'>Endereço</option>
+            <option value='name'>Nome do Produto</option>
+            <option value='barCode'>Código de Barras</option>
+            <option value='location'>Endereço</option>
         </select>";
     }
 
@@ -32,9 +32,9 @@ class Search {
 
     private static function gerarCamposEndereco(): string {
         return "<div class='" . self::CLASSES['input_group'] . "' id='enderecoFields' style='display: none;'>
-            <input type='text' name='setor' class='" . self::CLASSES['input'] . " mb-2' placeholder='Setor'/>
-            <input type='number' name='andar' class='" . self::CLASSES['input'] . " mb-2' placeholder='Andar'/>
-            <input type='number' name='posicao' class='" . self::CLASSES['input'] . "' placeholder='Posição'/>
+            <input type='text' name='sector' class='" . self::CLASSES['input'] . " mb-2' placeholder='Setor'/>
+            <input type='number' name='floor' class='" . self::CLASSES['input'] . " mb-2' placeholder='Andar'/>
+            <input type='number' name='position' class='" . self::CLASSES['input'] . "' placeholder='Posição'/>
         </div>";
     }
 
@@ -45,8 +45,8 @@ class Search {
     private static function gerarScript(): string {
         return "<script>
             document.querySelector('select[name=\"searchType\"]').addEventListener('change', function() {
-                document.getElementById('enderecoFields').style.display = this.value === 'endereco' ? 'block' : 'none';
-                document.getElementById('campoPesquisa').style.display = this.value === 'endereco' ? 'none' : 'block';
+                document.getElementById('enderecoFields').style.display = this.value === 'location' ? 'block' : 'none';
+                document.getElementById('campoPesquisa').style.display = this.value === 'location' ? 'none' : 'block';
             });
         </script>";
     }

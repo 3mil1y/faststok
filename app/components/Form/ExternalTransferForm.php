@@ -17,19 +17,22 @@ class ExternalTransferForm extends TransferForm {
                     " . self::generateSelect('sector', 'Setor',
                         $options['sectors'],
                         '',
-                        ['required' => true]
+                        ['required' => true],
+                        'Escolha o setor de origem'
                     ) . "
                     
                     " . self::generateSelect('floor', 'Andar',
                         $options['floors'],
                         '',
-                        ['required' => true]
+                        ['required' => true],
+                        'Escolha o andar de origem'
                     ) . "
                     
                     " . self::generateSelect('position', 'Posição',
                         $options['positions'],
                         '',
-                        ['required' => true]
+                        ['required' => true],
+                        'Escolha a posição de origem'
                     ) . "
                 </div>
                 <p class='" . self::CLASSES['hint'] . "'>Selecione a localização a ser transferida</p>

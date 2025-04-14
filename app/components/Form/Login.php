@@ -43,9 +43,9 @@ class Login {
 
                 <form class='" . self::CLASSES['form'] . "' action='{$action}' method='POST'>
                     <div class='" . self::CLASSES['input_group'] . "'>
-                        <input id='email' name='email' type='email' required 
+                        <input id='login' name='login' type='text' required 
                             class='" . self::CLASSES['input_first'] . "'
-                            placeholder='Email'>
+                            placeholder='Login'>
                             
                         <input id='password' name='password' type='password' required
                             class='" . self::CLASSES['input_last'] . "'

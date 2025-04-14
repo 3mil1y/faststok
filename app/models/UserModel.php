@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Core\Database;
+use App\Core\Database\Database;
 use App\Entities\User;
 use Exception;
 
@@ -12,18 +12,17 @@ class UserModel {
      */
     public static function create(User $user): bool {
         try {
-            $sql = "INSERT INTO user (login, , password, role) VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO user (login, password, role) VALUES (?, ?, ?)";
             $params = [
                 $user->getlogin(),
-                $user->get(),
                 password_hash($user->getPassword(), PASSWORD_DEFAULT),
                 $user->getRole()
             ];
             
-            Database::executePrepared($sql, "ssss", $params);
+            Database::executePrepared($sql, "sss", $params);
             
-            $id = Database::getLastInsertId();
-            $user->setId($id);
+           // $id = Database::getLastInsertId();
+            $user->setId(Database::getLastInsertId());
             
             return true;
         } catch (Exception $e) {
@@ -71,6 +70,26 @@ class UserModel {
     }
 
     /**
+     * Find user by login
+     */
+    public static function getByLogin(string $login): ?User {
+        try {
+            $sql = "SELECT id, login, role FROM user WHERE login = ?";
+            //$params = [$login];
+            
+            $result = Database::executePrepared($sql, "s", [$login]);
+            
+            if ($row = $result->fetch_assoc()) {
+                return self::mapToUser($row);
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            throw new Exception("Error finding user: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Update user details
      */
     public static function update(User $user): bool {
@@ -82,7 +101,7 @@ class UserModel {
                 $user->getId()
             ];
             
-            Database::executePrepared($sql, "sssi", $params);
+            Database::executePrepared($sql, "ssi", $params);
             return true;
         } catch (Exception $e) {
             throw new Exception("Erro ao validar login: " . $e->getMessage());
@@ -110,9 +129,9 @@ class UserModel {
     /**
      * Verify user credentials
      */
-    public static function verifyCredentials(string $login, string $password): ?User {
+    public static function validateLogin(string $login, string $password): ?User {
         try {
-            $sql = "SELECT * FROM user WHERE  = ?";
+            $sql = "SELECT * FROM user WHERE login = ?";
             $params = [$login];
             
             $result = Database::executePrepared($sql, "s", $params);

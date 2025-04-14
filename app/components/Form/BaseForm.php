@@ -35,7 +35,7 @@ abstract class BaseForm {
         return self::wrapInputGroup($label, "<input {$attrs}>");
     }
 
-    protected static function generateSelect(string $name, string $label, array $options, string $selected = '', array $attributes = []): string {
+    protected static function generateSelect(string $name, string $label, array $options, string $selected = '', array $attributes = [], string $default = ''): string {
         $attrs = self::buildAttributes(array_merge([
             'id' => $name,
             'name' => $name,
@@ -43,6 +43,9 @@ abstract class BaseForm {
         ], $attributes));
 
         $optionsHtml = '';
+        if(isset($default) && $default != '' && $selected == '') {
+            $optionsHtml .= "<option value='' disabled selected>{$default}</option>";
+        }
         foreach ($options as $value => $text) {
             $isSelected = $value == $selected ? ' selected' : '';
             $optionsHtml .= "<option value='{$value}'{$isSelected}>{$text}</option>";

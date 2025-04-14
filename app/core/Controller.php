@@ -17,7 +17,7 @@ abstract class Controller {
     }
 
     protected function redirect(string $url) {
-        header("Location: $this->getBaseUrl() . $url");
+        header("Location:" . self::getBaseUrl() . $url);
         exit;
     }
 
@@ -37,12 +37,16 @@ abstract class Controller {
         $this->redirect($url, 'info', $title, $content);
     }
 
-    protected function getBaseUrl(): string {
-        return "http://" . $_SERVER['HTTP_HOST'] . "/test/";
+    protected static function getBaseUrl(): string {
+        return "http://" . $_SERVER['HTTP_HOST'] . "/test/faststok/";
     }
 
     protected function input(string $key, $default = null) {
         return $_POST[$key] ?? $_GET[$key] ?? $default;
+    }
+
+    protected static function anyNull(...$values): bool {
+        return in_array(null, $values, true);
     }
 
     protected function isPost(): bool {
