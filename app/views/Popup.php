@@ -1,7 +1,9 @@
 <?php
 require_once "../app/core/autoloader.php";
 
-use Components\Common\Popup;
+use App\Components\Common\Popup;
+use App\Components\Layout\Head;
 
-echo Popup::render($titulo, $conteudo);
+echo Head::render($title);
+echo Popup::render($title, $content);
 ?>
