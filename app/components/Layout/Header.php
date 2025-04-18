@@ -1,6 +1,8 @@
 <?php
 namespace App\Components\Layout;
 
+use App\Core\SessionManager;
+
 class Header {
     private const CLASSES = [
         'header' => 'bg-gradient-to-r from-gray-800 to-gray-900 text-white p-4 shadow-md',
@@ -49,7 +51,18 @@ class Header {
             </div>";
     }
 
-    private static function generateDropdowns(): string {
+    private static function generateDropdowns($role): string {
+        $adminMenu = ($role === 'admin') ? "
+            <div class='" . self::CLASSES['dropdown_container'] . "'>
+                <button onclick='toggleDropdown(\"adminDropdown\")' class='" . self::CLASSES['dropdown_button'] . " bg-blue-600 hover:bg-blue-700'>
+                    Admin
+                </button>
+                <div id='adminDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
+                    <a href='admin/list' class='" . self::CLASSES['dropdown_item'] . "'>Listar Usuários</a>
+                    <a href='admin/createUser' class='" . self::CLASSES['dropdown_item'] . "'>Adicionar Usuário</a>
+                </div>
+            </div>" : "";
+
         return "
             <div class='hidden md:flex items-center space-x-4'>
                 <!-- Endereçamento Dropdown -->
@@ -85,18 +98,7 @@ class Header {
                         <a href='transfer/external' class='" . self::CLASSES['dropdown_item'] . "'>Saída</a>
                     </div>
                 </div>
-
-                <!-- Admin Dropdown -->
-                <div class='" . self::CLASSES['dropdown_container'] . "'>
-                    <button onclick='toggleDropdown(\"adminDropdown\")' class='" . self::CLASSES['dropdown_button'] . " bg-blue-600 hover:bg-blue-700'>
-                        Admin
-                    </button>
-                    <div id='adminDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
-                        <a href='admin/list' class='" . self::CLASSES['dropdown_item'] . "'>Listar Usuários</a>
-                        <a href='admin/createUser' class='" . self::CLASSES['dropdown_item'] . "'>Adicionar Usuário</a>
-                    </div>
-                </div>
-
+                " . $adminMenu . "
                 <!-- Usuário Dropdown -->
                 <div class='" . self::CLASSES['dropdown_container'] . "'>
                     <button onclick='toggleDropdown(\"usuarioDropdown\")' class='" . self::CLASSES['dropdown_button'] . " bg-blue-600 hover:bg-blue-700'>
@@ -136,7 +138,12 @@ class Header {
             </script>";
     }
 
-    private static function generateMobileMenu(): string {
+    private static function generateMobileMenu($role): string {
+
+        $adminMenu = ($role === 'admin') ? "
+                <a href='/admin/list' class='" . self::CLASSES['mobile_menu_item'] . "'>Listar Usuários</a>
+                <a href='/admin/createUser' class='" . self::CLASSES['mobile_menu_item'] . "'>Adicionar Usuário</a>" : "";
+
         return "
             <button id='mobile-menu-button' class='" . self::CLASSES['mobile_menu_button'] . "' aria-label='Menu'>
                 <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
@@ -154,8 +161,7 @@ class Header {
                 <a href='/report/stock' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
                 <a href='/transfer/internal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências Internas</a>
                 <a href='/transfer/external' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências de Saída</a>
-                <a href='/admin/list' class='" . self::CLASSES['mobile_menu_item'] . "'>Listar Usuários</a>
-                <a href='/admin/createUser' class='" . self::CLASSES['mobile_menu_item'] . "'>Adicionar Usuário</a>
+                " . $adminMenu . "
                 <a href='/user/logout' class='" . self::CLASSES['mobile_menu_item'] . "'>Sair</a>
             </div>
             <script>
@@ -166,12 +172,14 @@ class Header {
     }
 
     public static function render(): string {
+        $role = (!SessionManager::isAdmin()) ? 'user' : 'admin';
+
         return "
             <header class='" . self::CLASSES['header'] . "'>
                 <div class='" . self::CLASSES['header_container'] . "'>
                     " . self::generateLogo() . "
-                    " . self::generateMobileMenu() . "
-                    " . self::generateDropdowns() . "
+                    " . self::generateMobileMenu($role) . "
+                    " . self::generateDropdowns($role) . "
                 </div>
             </header>";
     }

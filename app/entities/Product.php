@@ -24,40 +24,45 @@ class Product {
         return $this->id;
     }
 
-    public function setId(int $id): void {
+    public function setId(int $id): Product {
         $this->id = $id;
+        return $this;
     }
 
     public function getBarcode(): string {
         return $this->barcode;
     }
 
-    public function setBarcode(string $barcode): void {
+    public function setBarcode(string $barcode): Product {
         $this->barcode = $barcode;
+        return $this;
     }
 
     public function getName(): string {
         return $this->name;
     }
 
-    public function setName(string $name): void {
+    public function setName(string $name): Product {
         $this->name = $name;
+        return $this;
     }
 
     public function getQuantity(): int {
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): void {
+    public function setQuantity(int $quantity): Product {
         $this->quantity = $quantity;
+        return $this;
     }
 
     public function getExpiryDate(): string {
         return $this->expiryDate;
     }
 
-    public function setExpiryDate(string $expiryDate): void {
+    public function setExpiryDate(string $expiryDate): Product {
         $this->expiryDate = $expiryDate;
+        return $this;
     }
 
     public function getLocation(): Location {
@@ -72,8 +77,9 @@ class Product {
         return $this->location->getLocationString();
     }
 
-    public function setLocation(Location $location): void {
+    public function setLocation(Location $location): Product {
         $this->location = $location;
+        return $this;
     }
 
     public function __toString(): string {

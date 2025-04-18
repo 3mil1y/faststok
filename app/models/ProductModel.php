@@ -218,6 +218,20 @@ class ProductModel {
     }
 
     /**
+     * Update stock quantity of a product
+     */
+    public static function updateStock(Product $product): bool {
+        try {
+            $sql = "UPDATE product SET quantity = ? WHERE product_id = ?";
+            $params = [$product->getQuantity(), $product->getId()];
+            Database::executePrepared($sql, "ii", $params);
+            return true;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao atualizar estoque: " . $e->getMessage());
+        }
+    }
+    
+    /**
      * Delete product
      */
     public static function delete(int $id): bool {

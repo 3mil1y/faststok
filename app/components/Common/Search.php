@@ -15,11 +15,14 @@ class Search {
         'select' => 'w-full p-2 border rounded-lg mb-3 bg-gray-100',
         'input' => 'w-full p-2 border rounded-lg bg-gray-100',
         'input_group' => 'mt-3',
-        'button' => 'w-full mt-3 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+        'button' => 'w-full mt-3 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700',
+        'error' => 'rounded-md bg-red-50 p-4 mt-4',
+        'error_text' => 'text-sm text-red-700'
     ];
 
     private static function gerarSelectTipoPesquisa(): string {
         return "<select class='" . self::CLASSES['select'] . "' name='searchType'>
+            <option value='' selected disabled>Selecione o tipo de pesquisa</option>
             <option value='name'>Nome do Produto</option>
             <option value='barCode'>Código de Barras</option>
             <option value='location'>Endereço</option>
@@ -27,17 +30,16 @@ class Search {
     }
 
     private static function gerarCampoInput(): string {
-        return "<input type='text' class='" . self::CLASSES['input'] . "' id='campoPesquisa' name='query' placeholder='Digite sua pesquisa...'/>";
+        return "<input type='text' class='" . self::CLASSES['input'] . "' id='campoPesquisa' name='query' placeholder='Digite sua pesquisa...' required/>";
     }
 
     private static function gerarCamposEndereco(): string {
-        return "<div class='" . self::CLASSES['input_group'] . "' id='enderecoFields' style='display: none;'>
-            <input type='text' name='sector' class='" . self::CLASSES['input'] . " mb-2' placeholder='Setor'/>
-            <input type='number' name='floor' class='" . self::CLASSES['input'] . " mb-2' placeholder='Andar'/>
-            <input type='number' name='position' class='" . self::CLASSES['input'] . "' placeholder='Posição'/>
-        </div>";
-    }
-
+    return "<div class='" . self::CLASSES['input_group'] . "' id='enderecoFields' style='display: none;'>
+        <input type='text' name='sector' pattern='[A-H]+' maxlength='1' class='" . self::CLASSES['input'] . " mb-2' placeholder='Setor (A - H)' required/>
+        <input type='number' min='1' max='5' step='1' name='floor' class='" . self::CLASSES['input'] . " mb-2' placeholder='Andar' required/>
+        <input type='number' min='1' max='12' step='1' name='position' class='" . self::CLASSES['input'] . "' placeholder='Posição' required/>
+    </div>";
+}
     private static function gerarBotaoBuscar(): string {
         return "<button type='submit' class='" . self::CLASSES['button'] . "'>Buscar</button>";
     }
@@ -45,16 +47,29 @@ class Search {
     private static function gerarScript(): string {
         return "<script>
             document.querySelector('select[name=\"searchType\"]').addEventListener('change', function() {
-                document.getElementById('enderecoFields').style.display = this.value === 'location' ? 'block' : 'none';
-                document.getElementById('campoPesquisa').style.display = this.value === 'location' ? 'none' : 'block';
+                const isLocation = this.value === 'location';
+                document.getElementById('enderecoFields').style.display = isLocation ? 'block' : 'none';
+                document.getElementById('campoPesquisa').style.display = isLocation ? 'none' : 'block';
+
+                // Manipula o atributo required corretamente
+                document.getElementById('campoPesquisa').required = !isLocation;
+                document.querySelector('input[name=\"sector\"]').required = isLocation;
+                document.querySelector('input[name=\"floor\"]').required = isLocation;
+                document.querySelector('input[name=\"position\"]').required = isLocation;
             });
         </script>";
     }
 
-    public static function render(string $action): string {
+    public static function render(string $action, string $error = null): string {
+        $errorMessage = ($error != null) ? "
+                <div class='" . self::CLASSES['error'] . "'>
+                    <p class='" . self::CLASSES['error_text'] . "'>{$error}</p>
+                </div>" : "";
+
         return "<div class='" . self::CLASSES['container'] . "'>
             <div class='" . self::CLASSES['form_container'] . "'>
                 <h2 class='" . self::CLASSES['titulo'] . "'>Pesquisa</h2>
+                ".$errorMessage."
                 <form method='POST' action='{$action}'>
                     " . self::gerarSelectTipoPesquisa() . "
                     " . self::gerarCampoInput() . "

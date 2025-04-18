@@ -15,8 +15,16 @@ class AdminController extends Controller {
 
     public function createUser($errorMessage = null) {
         if(self::isPost()){
-            UserModel::create(new User($_POST["login"], $_POST["password"],
-                ($_POST["role"] == null ? "user":"admin")));
+            if(UserModel::getByLogin(self::input("login")) !== null){
+                $errorMessage = "Usuário já cadastrado.";
+                $title = "Criação de Usuários";
+                $action = "admin/createUser";
+                $this->view("createUser", compact("errorMessage", "title", "action"));
+                return;
+            }
+
+            UserModel::create(new User(self::input("login"), self::input("password"),
+                (self::input("role") == null ? "user":"admin")));
 
             $title = "Lista de Usuários";
             $this->redirect("admin/list", compact("title"));
@@ -24,21 +32,21 @@ class AdminController extends Controller {
         }
 
         //If we reach here, it means user Creation failed
-        $title = "Lista de Usuários";
+        $title = "Criação de Usuários";
         $action = "admin/createUser";
         
         $this->view("createUser", compact("title", "action", "errorMessage"));
     }
 
     public function editUser($id) {
-        if(self::isPost()){
-            $user = UserModel::getById($id);
-            $user->setLogin($_POST["login"]);
-            $user->setRole($_POST["role"]);
+    if(self::isPost()){
+        $user = UserModel::getById($id);
+        $user->setLogin(self::input("login"));
+        $user->setRole(self::input("role"));
 
-            UserModel::update($user);
+        UserModel::update($user);
 
-            $title = "Lista de Usuários";
+        $title = "Lista de Usuários";
             $this->redirect("admin/list", compact("title"));
             return;
         }
@@ -59,13 +67,17 @@ class AdminController extends Controller {
         }
 
             //errors neds to be implemented in the view and treated in controller
-
+            try{
             UserModel::delete($id);
 
             $title = "Lista de Usuários";
             $this->redirect("admin/list", compact("title"));
             return;
-        
+            } catch(Exception $e){
+                $errorMessage = "Erro ao deletar usuário: " . $e->getMessage();
+                $this->view("admin/list", compact("errorMessage"));
+                return;
+            }
     }
 
     //Decidir forma de implementar essa porra

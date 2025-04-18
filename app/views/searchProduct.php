@@ -7,5 +7,5 @@ use App\Components\Layout\Head;
 
 echo Head::render($title);
 echo Header::render();
-echo Search::render($action);
+echo Search::render($action, $error);
 ?>

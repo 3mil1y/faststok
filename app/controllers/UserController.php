@@ -29,7 +29,7 @@ class UserController extends Controller {
         // If we reach here, it means login failed
         // Show the login form again with an error message
         $title = "Login";
-        $error = ($errorMessage === 'invalidCredentials') ? 'E-mail ou senha incorretos, por favor tente novamente!' : "";
+        $error = ($errorMessage === 'invalidCredentials') ? 'Login ou senha incorretos, por favor tente novamente!' : "";
         $action = "user/login";
         $this->view("login", compact("title", "action", "error"));
     }

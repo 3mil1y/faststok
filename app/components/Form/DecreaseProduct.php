@@ -29,7 +29,7 @@ class DecreaseProduct extends BaseForm {
                         ['readonly' => true]
                     ) . "
                     
-                    " . self::generateTextInput('quantity', 'Quantidade Atual',
+                    " . self::generateTextInput('stock', 'Quantidade Atual',
                         (string)$product->getQuantity(),
                         [
                             'type' => 'number',

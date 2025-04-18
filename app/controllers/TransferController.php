@@ -9,25 +9,25 @@ use App\entities\Location;
 class TransferController extends Controller {
     public function internal() {
         if(self::isPost()){
-            $originSector = self::input("originSector");
-            $originFloor = self::input("originFloor");
-            $originPosition = self::input("originPosition");
-            $destinationSector = self::input("destinationSector");
-            $destinationFloor = self::input("destinationFloor");
-            $destinationPosition = self::input("destinationPosition");
 
             // Validate the product and quantity
-            if (self::anyNull([$originSector, $originFloor, $originPosition, $destinationSector, $destinationFloor, $destinationPosition])) {
+            if (self::anyNull(self::input("originSector"), self::input("originFloor"), self::input("originPosition"), self::input("destinationSector"), self::input("destinationFloor"), self::input("destinationPosition"))) {
                 $errorMessage = "Todos os campos são obrigatórios.";
                 $this->view("internalTransfer", compact("errorMessage"));
                 return;
             }
 
+            if(self::inInterval(self::input("originFloor"), 1, 5) && self::inInterval(self::input("originPosition"), 1, 12) && self::inInterval(self::input("destinationFloor"), 1, 5) && self::inInterval(self::input("destinationPosition"), 1, 12)) {
+                $errorMessage = "Os produtos devem seguir os intervalos definidos!";
+                $this->view("internalTransfer", compact("errorMessage"));
+                return;
+            }
+
             // Perform the transfer logic here (e.g., update database)
-            
+        
             ProductModel::updateAllLocations(
-                LocationModel::findIdByData(new Location($originSector, $originFloor, $originPosition)),
-                LocationModel::findIdByData(new Location($destinationSector, $destinationFloor, $destinationPosition))
+                LocationModel::findIdByData(new Location(self::input("originSector"), self::input("originFloor"), self::input("originPosition"))),
+                LocationModel::findIdByData(new Location(self::input("destinationSector"), self::input("destinationFloor"), self::input("destinationPosition")))
             );
 
             //errors message needs to be implemented in the view

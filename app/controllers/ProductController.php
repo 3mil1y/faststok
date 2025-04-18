@@ -22,6 +22,24 @@ class ProductController extends Controller {
     }
     
     public function decrease($id) {
+        if(self::isPost()){
+            if(self::anyNull(self::input("decreaseAmount")) || !self::inInterval(self::input("decreaseAmount"), 1, self::input("stock"))) {
+                $errorMessage = "Favor informe uma quantidade maior que zero e menor que o estoque!";
+                $title = "Baixa de Produto";
+                $action = 'product/decrease/' . $id;
+                $product = ProductModel::getById($id);
+                $this->view("decreaseProduct", compact("title", "product", "action", "errorMessage"));
+                return;
+            }
+
+            ProductModel::updateStock(    
+                (ProductModel::getById($id))->setQuantity(
+                    self::input("stock") - self::input("decreaseAmount")
+                )
+            );
+            self::redirect('product/home');
+        }
+
         $title = "Baixa de Produto";
         // Action for form submission (if any)
         $action = 'product/decrease/' . $id;
@@ -49,16 +67,26 @@ class ProductController extends Controller {
                 break;
 
             case 'location':
-                $sector = self::input("sector");
-                $floor = self::input("floor");
-                $position = self::input("position");
+                
+                if(!self::anyNull(self::input("sector"), self::input("floor"), self::input("position"))) {
+                    if(!self::inInterval(self::input("floor"), 1, 5) || !self::inInterval(self::input("position"), 1, 12)) {
+                        $error = "Os produtos devem seguir os intervalos definidos!";
+                        break;
+                    }
 
-                $title = "Pesquisa de Produtos por Endereço";
-                if ($sector || $floor || $position) {
-                    $products = ProductModel::getByLocationId(LocationModel::findIdByData(new Location($sector, $floor, $position))) ?? [];
+                    // $sector = self::input("sector");
+                    // $floor = self::input("floor");
+                    // $position = self::input("position");
+
+                    $title = "Pesquisa de Produtos por Endereço";
+                    $products = ProductModel::getByLocationId(
+                        LocationModel::findIdByData(
+                            new Location(self::input("sector"), self::input("floor"), self::input("position"))
+                        )
+                    ) ?? [];
                 } else {
-                    // Pode adicionar uma mensagem de erro ou redirecionar
-                    $this->redirect("product/search");
+                    $error = "Preencha todos os campos de endereço!";
+                    //$this->redirect("product/search", compact("error"));
                     return;
                 }
                 break;
@@ -81,7 +109,8 @@ class ProductController extends Controller {
         $title = "Pesquisa de Produtos";
         // Action for form submission (if any)
         $action = 'product/search';
-        $this->view("searchProduct", compact("title", "action"));
+        $error = null;
+        $this->view("searchProduct", compact("title", "action", "error"));
     }
 
     // public function home() {

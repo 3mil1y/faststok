@@ -49,6 +49,10 @@ abstract class Controller {
         return in_array(null, $values, true);
     }
 
+    protected static function inInterval(int|float $value, int|float $min, int|float $max): bool {
+        return ($value >= $min && $value <= $max) ? true : false;
+    }
+
     protected function isPost(): bool {
         return $_SERVER['REQUEST_METHOD'] === 'POST';
     }
