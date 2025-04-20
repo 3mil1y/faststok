@@ -68,6 +68,7 @@ class Header {
                         <a href='product/home' class='" . self::CLASSES['dropdown_item'] . "'>Listar Produto</a>
                         <a href='product/search' class='" . self::CLASSES['dropdown_item'] . "'>Buscar Produto</a>
                         <a href='product/create' class='" . self::CLASSES['dropdown_item'] . "'>Endereçar Produto</a>
+                        <a href='product/continueCreate' class='" . self::CLASSES['dropdown_item'] . "'>Endereçamento Continuo de Produto</a>
                     </div>
                 </div>
 
@@ -151,7 +152,8 @@ class Header {
             <div id='mobile-menu' class='" . self::CLASSES['mobile_menu'] . "'>
                 <a href='/product/home' class='" . self::CLASSES['mobile_menu_item'] . "'>Home</a>
                 <a href='/product/search' class='" . self::CLASSES['mobile_menu_item'] . "'>Produtos</a>
-                <a href='/product/create' class='" . self::CLASSES['mobile_menu_item'] . "'>Cadastrar Produto</a>
+                <a href='/product/create' class='" . self::CLASSES['mobile_menu_item'] . "'>Endereçar Produto</a>
+                <a href='/product/continueCreate' class='" . self::CLASSES['mobile_menu_item'] . "'>Endereçamento Continuo de Produto</a>
                 <a href='/product/search' class='" . self::CLASSES['mobile_menu_item'] . "'>Pesquisar</a>
                 <a href='/report/expiry' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Validade</a>
                 <a href='/report/stock' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
