@@ -7,5 +7,9 @@ use App\Components\Layout\Head;
 
 echo Head::render($title);
 echo Header::render();
-echo createProduct::render($action);
+echo createProduct::render($action,
+[
+    'errorMessage' => $errorMessage ?? null,
+    'successMessage' => $successMessage ?? null
+]);
 ?>

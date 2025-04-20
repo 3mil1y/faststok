@@ -5,8 +5,17 @@ use App\Core\Controller;
 use App\Models\ProductModel;
 use App\Models\LocationModel;
 use App\entities\Location;
+use App\entities\Product;
 
 class ProductController extends Controller {
+    private const FLOOR_RANGE = [1, 5];
+    private const POSITION_RANGE = [1, 12];
+
+    private const ERRORS = [
+        "AllFieldsNeeded" => "Todos os campos são obrigatórios.",
+        "InvalidInterval" => "Os produtos devem seguir os intervalos definidos!"
+    ];
+
     public function home() {
         $title = "Lista de Produtos";
         // Fetch all products from the database
@@ -15,10 +24,11 @@ class ProductController extends Controller {
     }
 
     public function create() {
-        $title = "Criar Produto";
-        // Action for form submission
-        $action = "product/create";
-        $this->view("createProduct", compact("title", "action"));
+        $this->handleProductCreate("Criar Produto", "product/create", true);
+    }
+
+    public function continueCreate(){
+        $this->handleProductCreate("Endereçamento Continuo de Produto", "product/continueCreate", false);
     }
     
     public function decrease($id) {
@@ -54,29 +64,21 @@ class ProductController extends Controller {
         $title = "Pesquisa de Produtos";
 
         switch ($searchType) {
-            case 'name':
-                $query = self::input("query");
+            case 'name':    
                 $title = "Pesquisa de Produtos por Nome";
-                $products = ProductModel::getByName($query) ?? [];
+                $products = ProductModel::getByName(self::input("query")) ?? [];
                 break;
-
             case 'barCode':
-                $query = self::input("query");
                 $title = "Pesquisa de Produtos por Código de Barras";
-                $products = ProductModel::getByBarcode($query) ?? [];
+                $products = ProductModel::getByBarcode(self::input("query")) ?? [];
                 break;
-
             case 'location':
                 
-                if(!self::anyNull(self::input("sector"), self::input("floor"), self::input("position"))) {
-                    if(!self::inInterval(self::input("floor"), 1, 5) || !self::inInterval(self::input("position"), 1, 12)) {
+                if(!self::anyInputNull(["sector", "floor", "position"])) {
+                    if(!self::inputsInRange(["floor" => self::FLOOR_RANGE, "position" => self::POSITION_RANGE])) {
                         $error = "Os produtos devem seguir os intervalos definidos!";
                         break;
                     }
-
-                    // $sector = self::input("sector");
-                    // $floor = self::input("floor");
-                    // $position = self::input("position");
 
                     $title = "Pesquisa de Produtos por Endereço";
                     $products = ProductModel::getByLocationId(
@@ -86,7 +88,6 @@ class ProductController extends Controller {
                     ) ?? [];
                 } else {
                     $error = "Preencha todos os campos de endereço!";
-                    //$this->redirect("product/search", compact("error"));
                     return;
                 }
                 break;
@@ -95,15 +96,10 @@ class ProductController extends Controller {
                 $this->redirect("product/search");
                 return;
         }
-            // If we reach here, it means search was successful
 
-            // Perform the search logic here (e.g., update database)
-            //$products = ProductModel::search($name, $sector, $floor, $position) ?? [];
-
-            // Redirect or show success message
-            $this->view("productList", compact("products", "title"));
-            return;
-        }
+        $this->view("productList", compact("products", "title"));
+        return;
+    }
 
         // If we reach here, it means search failed or no search was performed or method is get
         $title = "Pesquisa de Produtos";
@@ -113,13 +109,65 @@ class ProductController extends Controller {
         $this->view("searchProduct", compact("title", "action", "error"));
     }
 
-    // public function home() {
-    //     $title = "Home";
-    //     $products = ProductModel::list() ?? [];
-    //     $this->view("productList", compact("title", "products"));
-    // }
+    protected function handleProductCreate(string $title, string $action, bool $shouldRedirect = false){
+        $errorMessage = null;
+        $successMessage = null;
 
-    public function popup($title, $content) {
-        $this->view("popup", compact("title", "content"));
+        if (self::isPost()) {
+            $errorMessage = $this->validateInputs();
+
+
+            if (!$errorMessage) {
+                try {
+                    $successMessage = $this->executeProductCreate();
+                } catch (Exception $e) {
+                    $errorMessage = $e->getMessage();
+                }
+            }
+
+            if ($shouldRedirect && $successMessage) {
+                $this->redirect("product/home");
+            }
+        }
+
+        $this->view("createProduct", compact("title", "action", "errorMessage", "successMessage"));
+    }
+
+    protected function validateInputs(): ?string {
+        $requiredFields = [
+            "sector", "floor", "position",
+            "name", "barCode", "quantity", "expirationDate"
+        ];
+    
+        $requiredRanges = [
+            "floor" => self::FLOOR_RANGE, "position" => self::POSITION_RANGE
+        ];
+    
+        if (self::anyInputNull($requiredFields)) {
+            return self::ERRORS["AllFieldsNeeded"];
+        }
+
+        if (!empty($requiredRanges) && !self::inputsInRange($requiredRanges)) {
+            return self::ERRORS["InvalidInterval"];
+        }
+
+        return null;
+    }
+
+    protected function executeProductCreate(){
+        try{
+            ProductModel::create(new Product(
+                self::input("name"),
+                self::input("barCode"),
+                self::input("quantity"),
+                self::input("expirationDate"),
+                LocationModel::findByData(new Location(
+                    self::input("sector"), self::input("floor"), self::input("position")
+            ))));
+
+            return "Produto cadastrado com sucesso.";
+        }catch(Exception $e){
+            throw new Exception("Erro ao cadastrar produto: " . $e->getMessage());
+        }
     }
 }

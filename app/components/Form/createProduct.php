@@ -10,7 +10,9 @@ class createProduct {
         'select' => 'mt-1 p-2 block w-full border border-gray-300 rounded-md',
         'grid_2' => 'grid grid-cols-2 gap-4',
         'grid_3' => 'grid grid-cols-3 gap-4',
-        'button' => 'mt-4 px-6 py-2 bg-blue-600 text-white rounded-md'
+        'button' => 'mt-4 px-6 py-2 bg-blue-600 text-white rounded-md',
+        'error' => 'mt-1 text-sm text-red-600',
+        'success' => 'mt-1 text-sm text-green-600',
     ];
 
     private static function generateOptions(array $values, string $initialText): string {
@@ -37,17 +39,22 @@ class createProduct {
         </div>";
     }
 
-    public static function render($action = ''): string {
-        $sectors = range('A', 'H');
-        $floors = range(1, 5);
-        $positions = range(1, 12);
+    public static function render($action = '', $params = []): string {
+    $sectors = range('A', 'H');
+    $floors = range(1, 5);
+    $positions = range(1, 12);
+    
+    $error = ($params['errorMessage'] == null) ? null : "<p class='" . self::CLASSES['error'] . "'>{$params['errorMessage']}</p>";
+    $successMessage = ($params['successMessage'] == null) ? null : "<p class='" . self::CLASSES['success'] . "'>{$params['successMessage']}</p>";
 
-        $sectorOptions = self::generateOptions($sectors, 'Selecione um setor');
+    $sectorOptions = self::generateOptions($sectors, 'Selecione um setor');
         $floorOptions = self::generateOptions($floors, 'Selecione um andar');
         $positionOptions = self::generateOptions($positions, 'Selecione uma posição');
 
         return "<form action='{$action}' method='post' class='" . self::CLASSES['form'] . "'>
             <h1 class='" . self::CLASSES['title'] . "'>Cadastre um novo Produto</h1>
+            {$error}
+            {$successMessage}
             
             " . self::generateInputField('name', 'Nome') . "
             
