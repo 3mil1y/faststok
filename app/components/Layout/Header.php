@@ -9,7 +9,7 @@ class Header {
         'header_container' => 'max-w-7xl mx-auto flex justify-between items-center flex-wrap',
         'logo_container' => 'flex items-center mb-4 md:mb-0',
         'logo_text' => 'text-xl font-bold flex items-center',
-        'logo_icon' => 'text-blue-400 mr-2',
+        'logo_icon' => 'mx-auto h-12 w-auto text-blue-600',
         'nav_container' => 'w-full md:w-auto flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4',
         'dropdown_container' => 'relative w-full md:w-auto',
         'dropdown_button' => 'flex items-center justify-between w-full md:w-auto px-4 py-2 text-white rounded-md transition-colors duration-200',
@@ -33,14 +33,8 @@ class Header {
             <div class='" . self::CLASSES['logo_container'] . "'>
                 <div class='" . self::CLASSES['logo_text'] . "'>
                 <a href='product/home'>
-                <svg class='" . self::CLASSES['logo_icon'] . "' xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
-                        <path d='M20 7h-3a2 2 0 0 1-2-2V2'></path>
-                        <path d='M9 2v3a2 2 0 0 1-2 2H4'></path>
-                        <path d='M3 9h3a2 2 0 0 1 2 2v3'></path>
-                        <path d='M9 15v3a2 2 0 0 0 2 2h3'></path>
-                        <path d='M15 9h3a2 2 0 0 1 2 2v3'></path>
-                        <path d='M15 15h3a2 2 0 0 0 2 2v3'></path>
-                        <path d='M4 20h3a2 2 0 0 0 2-2v-3'></path>
+                   <svg class='" . self::CLASSES['logo_icon'] . "' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'/>
                     </svg>
                     </a>
                     <a href='product/home'>
@@ -96,6 +90,8 @@ class Header {
                     <div id='transfersDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
                         <a href='transfer/internal' class='" . self::CLASSES['dropdown_item'] . "'>Internas</a>
                         <a href='transfer/external' class='" . self::CLASSES['dropdown_item'] . "'>Saída</a>
+                        <a href='transfer/continueInternal' class='" . self::CLASSES['dropdown_item'] . "'>Interna Contínua</a>
+                        <a href='transfer/continueExternal' class='" . self::CLASSES['dropdown_item'] . "'>Saída Contínua</a>
                     </div>
                 </div>
                 " . $adminMenu . "
@@ -161,6 +157,8 @@ class Header {
                 <a href='/report/stock' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
                 <a href='/transfer/internal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências Internas</a>
                 <a href='/transfer/external' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências de Saída</a>
+                <a href='/transfer/continueInternal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferência Interna Contínua</a>
+                <a href='/transfer/continueExternal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferência de Saída Contínua</a>  
                 " . $adminMenu . "
                 <a href='/user/logout' class='" . self::CLASSES['mobile_menu_item'] . "'>Sair</a>
             </div>

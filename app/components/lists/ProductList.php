@@ -5,7 +5,7 @@ use App\Entities\Product;
 
 class ProductList {
     private const CLASSES = [
-        'container' => 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto',
+        'container' => 'w-[90%] mt-[3vh] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto',
         'card' => 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300',
         'header' => 'px-4 py-3 bg-gray-50 border-b',
         'title' => 'text-lg font-semibold text-gray-900',
