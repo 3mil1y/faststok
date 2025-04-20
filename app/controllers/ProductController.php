@@ -13,7 +13,8 @@ class ProductController extends Controller {
 
     private const ERRORS = [
         "AllFieldsNeeded" => "Todos os campos são obrigatórios.",
-        "InvalidInterval" => "Os produtos devem seguir os intervalos definidos!"
+        "InvalidInterval" => "Os produtos devem seguir os intervalos definidos!",
+        "StockRange" => "Favor informe uma quantidade maior que zero e menor que o estoque!"
     ];
 
     public function home() {
@@ -32,29 +33,7 @@ class ProductController extends Controller {
     }
     
     public function decrease($id) {
-        if(self::isPost()){
-            if(self::anyNull(self::input("decreaseAmount")) || !self::inInterval(self::input("decreaseAmount"), 1, self::input("stock"))) {
-                $errorMessage = "Favor informe uma quantidade maior que zero e menor que o estoque!";
-                $title = "Baixa de Produto";
-                $action = 'product/decrease/' . $id;
-                $product = ProductModel::getById($id);
-                $this->view("decreaseProduct", compact("title", "product", "action", "errorMessage"));
-                return;
-            }
-
-            ProductModel::updateStock(    
-                (ProductModel::getById($id))->setQuantity(
-                    self::input("stock") - self::input("decreaseAmount")
-                )
-            );
-            self::redirect('product/home');
-        }
-
-        $title = "Baixa de Produto";
-        // Action for form submission (if any)
-        $action = 'product/decrease/' . $id;
-        $product = ProductModel::getById($id);
-        $this->view("decreaseProduct", compact("title", "product", "action"));
+        $this->handleProductDecrease("Baixa de Produto", "product/decrease/" . $id, $id);
     }
 
     public function search() {
@@ -99,14 +78,14 @@ class ProductController extends Controller {
 
         $this->view("productList", compact("products", "title"));
         return;
-    }
+        }
 
         // If we reach here, it means search failed or no search was performed or method is get
         $title = "Pesquisa de Produtos";
         // Action for form submission (if any)
         $action = 'product/search';
         $error = null;
-        $this->view("searchProduct", compact("title", "action", "error"));
+        $this->handleProductSearch($title, $action);
     }
 
     protected function handleProductCreate(string $title, string $action, bool $shouldRedirect = false){
@@ -114,7 +93,7 @@ class ProductController extends Controller {
         $successMessage = null;
 
         if (self::isPost()) {
-            $errorMessage = $this->validateInputs();
+            $errorMessage = $this->validateCreateInputs();
 
 
             if (!$errorMessage) {
@@ -133,16 +112,78 @@ class ProductController extends Controller {
         $this->view("createProduct", compact("title", "action", "errorMessage", "successMessage"));
     }
 
-    protected function validateInputs(): ?string {
-        $requiredFields = [
-            "sector", "floor", "position",
-            "name", "barCode", "quantity", "expirationDate"
-        ];
-    
-        $requiredRanges = [
-            "floor" => self::FLOOR_RANGE, "position" => self::POSITION_RANGE
-        ];
-    
+    protected function handleProductSearch(string $title, string $action){
+        $title = "Pesquisa de Produtos";
+        $action = "product/search";
+
+        if (self::isPost()) {
+            $products = [];
+            $error = null;
+        
+            switch (self::input("searchType")) {
+                case 'name':
+                    $title = "Pesquisa de Produtos por Nome";
+                    $products = ProductModel::getByName(self::input("query")) ?? [];
+                    break;
+        
+                case 'barCode':
+                    $title = "Pesquisa de Produtos por Código de Barras";
+                    $products = ProductModel::getByBarcode(self::input("query")) ?? [];
+                    break;
+        
+                case 'location':
+                    $error = $this->validateSearchInputs(["sector", "floor", "position"], [
+                        "floor" => self::FLOOR_RANGE,
+                        "position" => self::POSITION_RANGE
+                    ]);
+        
+                    if (!$error) {
+                        $title = "Pesquisa de Produtos por Endereço";
+                        $location = new Location(self::input("sector"), self::input("floor"), self::input("position"));
+                        $locationId = LocationModel::findIdByData($location);
+        
+                        $products = ProductModel::getByLocationId($locationId) ?? [];
+                    } else {
+                        $this->view("searchProduct", [
+                            'title' => 'Pesquisa de Produtos',
+                            'action' => 'product/search',
+                            'error' => $error
+                        ]);
+                        return;
+                    }
+                    break;
+        
+                default:
+                    $this->redirect("product/search");
+                    return;
+            }
+        
+            $this->view("productList", compact("products", "title", "errorMessage"));
+        }
+
+    protected function handleProductDecrease(string $title, string $action, int $id){
+        $errorMessage = null;
+        $successMessage = null;
+
+        if (self::isPost()) {
+            $errorMessage = $this->validateDecreaseInputs();
+
+            if (!$errorMessage) {
+                try {
+                    $successMessage = $this->executeProductDecrease($id);
+                } catch (Exception $e) {
+                    $errorMessage = $e->getMessage();
+                }
+            }
+
+            $this->redirect("product/home");
+        }
+
+        $product = ProductModel::getById($id);
+        $this->view("decreaseProduct", compact("title", "product", "action", "errorMessage", "successMessage"));
+    }
+
+    protected function validateInputs($requiredFields, $requiredRanges = []): ?string {
         if (self::anyInputNull($requiredFields)) {
             return self::ERRORS["AllFieldsNeeded"];
         }
@@ -152,6 +193,37 @@ class ProductController extends Controller {
         }
 
         return null;
+    }
+
+    protected function validateCreateInputs(): ?string {
+        $requiredFields = [
+            "sector", "floor", "position",
+            "name", "barCode", "quantity", "expirationDate"
+        ];
+    
+        $requiredRanges = [
+            "floor" => self::FLOOR_RANGE, "position" => self::POSITION_RANGE
+        ];
+    
+        return $this->validateInputs($requiredFields, $requiredRanges);
+    }
+
+    protected function validateDecreaseInputs(): ?string {
+        $requiredFields = [
+            "decreaseAmount"
+        ];
+
+    
+        $requiredRanges = [
+            "decreaseAmount" => [1, self::input("stock")]
+        ];
+
+    
+        return $this->validateInputs($requiredFields, $requiredRanges);
+    }
+
+    protected function validateSearchInputs($requiredFields, $requiredRanges = []): ?string {
+        return $this->validateInputs($requiredFields, $requiredRanges);
     }
 
     protected function executeProductCreate(){
@@ -168,6 +240,19 @@ class ProductController extends Controller {
             return "Produto cadastrado com sucesso.";
         }catch(Exception $e){
             throw new Exception("Erro ao cadastrar produto: " . $e->getMessage());
+        }
+    }
+
+    protected function executeProductDecrease($id){
+        try{
+            ProductModel::updateStock(    
+                (ProductModel::getById($id))->setQuantity(
+                    self::input("stock") - self::input("decreaseAmount")
+                )
+            );
+            return "Baixa de produto realizada com sucesso.";
+        }catch(Exception $e){
+            throw new Exception("Erro ao realizar baixa de produto: " . $e->getMessage());
         }
     }
 }

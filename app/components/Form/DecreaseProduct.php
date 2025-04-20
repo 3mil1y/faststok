@@ -10,10 +10,17 @@ class DecreaseProduct extends BaseForm {
             return "<div class='text-center text-red-600'>Produto não encontrado</div>";
         }
 
+        
+    $error = ($params['errorMessage'] == null) ? null : "<p class='" . self::CLASSES['error'] . "'>{$params['errorMessage']}</p>";
+    $successMessage = ($params['successMessage'] == null) ? null : "<p class='" . self::CLASSES['success'] . "'>{$params['successMessage']}</p>";
+
         return "
         <form action='{$action}' method='POST' class='" . self::CLASSES['form'] . "'>
             <h2 class='" . self::CLASSES['title'] . "'>Baixa de Produto</h2>
-            
+
+            {$error}
+            {$successMessage}
+
             <input type='hidden' name='productId' value='{$product->getId()}'>
 
             <div class='" . self::CLASSES['section'] . "'>
