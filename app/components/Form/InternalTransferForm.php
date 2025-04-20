@@ -6,10 +6,14 @@ use App\Entities\Product;
 class InternalTransferForm extends TransferForm {
     public static function render(string $action, array $params = []): string {
         $options = self::createLocationOptions();
+        $error = ($params['errorMessage'] == null) ? null : "<p class='" . self::CLASSES['error'] . "'>{$params['errorMessage']}</p>";
+        $successMessage = ($params['successMessage'] == null) ? null : "<p class='" . self::CLASSES['success'] . "'>{$params['successMessage']}</p>";
 
         return "
         <form action='{$action}' method='POST' class='" . self::CLASSES['form'] . "'>
             <h2 class='" . self::CLASSES['title'] . "'>Transferência Interna de Produtos</h2>
+            {$error}
+            {$successMessage}
             
             <div class='" . self::CLASSES['section'] . "'>
                 <h3 class='" . self::CLASSES['section_title'] . "'>Localização de Origem</h3>

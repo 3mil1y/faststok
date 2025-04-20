@@ -21,9 +21,6 @@ class Head {
             <!-- Custom styles -->
             <link rel='stylesheet' href='/test/faststok/public/css/tail.css'>
             
-            <!-- Alpine.js for interactive components
-            <script defer src='https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js'></script> --!>
-            
             <!-- Custom JavaScript -->
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
