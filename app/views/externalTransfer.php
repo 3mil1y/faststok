@@ -7,5 +7,7 @@ use App\Components\Layout\Head;
 
 echo Head::render($title);
 echo Header::render();
-echo ExternalTransferForm::render($action);
+echo ExternalTransferForm::render($action, 
+["errorMessage" => ($errorMessage ?? null),
+"successMessage" => ($successMessage ?? null)]);
 ?>

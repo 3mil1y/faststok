@@ -15,6 +15,7 @@ abstract class BaseForm {
         'select' => 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
         'textarea' => 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
         'error' => 'mt-1 text-sm text-red-600',
+        'success' => 'mt-1 text-sm text-green-600',
         'hint' => 'mt-1 text-sm text-gray-500',
         'button_group' => 'flex justify-end space-x-3 mt-6',
         'button' => 'inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2',
