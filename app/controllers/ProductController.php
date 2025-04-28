@@ -36,13 +36,15 @@ class ProductController extends Controller {
         $this->handleProductDecrease("Baixa de Produto", "product/decrease/" . $id, $id);
     }
 
+    //need refactoring
     public function search() {
         if(self::isPost()){
-        $searchType = self::input("searchType");
-        $products = [];
-        $title = "Pesquisa de Produtos";
-
-        switch ($searchType) {
+            $searchType = self::input("searchType");
+            $products = [];
+            $title = "Pesquisa de Produtos";
+            $error = null;
+            
+            switch ($searchType) {
             case 'name':    
                 $title = "Pesquisa de Produtos por Nome";
                 $products = ProductModel::getByName(self::input("query")) ?? [];
@@ -53,39 +55,63 @@ class ProductController extends Controller {
                 break;
             case 'location':
                 
-                if(!self::anyInputNull(["sector", "floor", "position"])) {
-                    if(!self::inputsInRange(["floor" => self::FLOOR_RANGE, "position" => self::POSITION_RANGE])) {
-                        $error = "Os produtos devem seguir os intervalos definidos!";
-                        break;
-                    }
+                if(self::anyInputNull(["sector", "floor", "position"])) {
+                    $error = "Preencha todos os campos de endereço!";
+                    break;
+                }
 
-                    $title = "Pesquisa de Produtos por Endereço";
-                    $products = ProductModel::getByLocationId(
+                if(!self::inputsInRange(["floor" => self::FLOOR_RANGE, "position" => self::POSITION_RANGE])) {
+                    $error = "Os produtos devem seguir os intervalos definidos!";
+                    break;
+                }
+
+                $title = "Pesquisa de Produtos por Endereço";
+                $products = ProductModel::getByLocationId(
                         LocationModel::findIdByData(
                             new Location(self::input("sector"), self::input("floor"), self::input("position"))
-                        )
-                    ) ?? [];
-                } else {
-                    $error = "Preencha todos os campos de endereço!";
-                    return;
-                }
+                        )) ?? [];
                 break;
 
-            default:
-                $this->redirect("product/search");
-                return;
+                default:
+                    $this->redirect("product/search");
+                    return;
         }
 
-        $this->view("productList", compact("products", "title"));
+        if(empty($products)) {
+            $action = "product/search";
+            $error = "Nenhum produto encontrado.";
+            $this->view("searchProduct", compact("action", "title", "error"));
+            return;
+        }
+
+        $this->view("productList", compact("products", "title", "error"));
         return;
         }
+    
 
         // If we reach here, it means search failed or no search was performed or method is get
         $title = "Pesquisa de Produtos";
         // Action for form submission (if any)
         $action = 'product/search';
         $error = null;
-        $this->handleProductSearch($title, $action);
+        $this->view("searchProduct", compact("title", "action", "error"));
+    }
+
+    //need refactoring
+    //Need implement view
+    //Need Error treatment
+    public function deleteByStock() {
+        // if(self::isPost()){
+            ProductModel::deleteByStock();
+            $this->redirect("product/home");
+            return;
+        // }
+
+        
+
+        // $title = "Excluir Estoque Baixo";
+        // $action = "product/deleteByStock";
+        // $this->view("deleteByStock", compact("title", "action"));
     }
 
     protected function handleProductCreate(string $title, string $action, bool $shouldRedirect = false){
@@ -111,55 +137,6 @@ class ProductController extends Controller {
 
         $this->view("createProduct", compact("title", "action", "errorMessage", "successMessage"));
     }
-
-    protected function handleProductSearch(string $title, string $action){
-        $title = "Pesquisa de Produtos";
-        $action = "product/search";
-
-        if (self::isPost()) {
-            $products = [];
-            $error = null;
-        
-            switch (self::input("searchType")) {
-                case 'name':
-                    $title = "Pesquisa de Produtos por Nome";
-                    $products = ProductModel::getByName(self::input("query")) ?? [];
-                    break;
-        
-                case 'barCode':
-                    $title = "Pesquisa de Produtos por Código de Barras";
-                    $products = ProductModel::getByBarcode(self::input("query")) ?? [];
-                    break;
-        
-                case 'location':
-                    $error = $this->validateSearchInputs(["sector", "floor", "position"], [
-                        "floor" => self::FLOOR_RANGE,
-                        "position" => self::POSITION_RANGE
-                    ]);
-        
-                    if (!$error) {
-                        $title = "Pesquisa de Produtos por Endereço";
-                        $location = new Location(self::input("sector"), self::input("floor"), self::input("position"));
-                        $locationId = LocationModel::findIdByData($location);
-        
-                        $products = ProductModel::getByLocationId($locationId) ?? [];
-                    } else {
-                        $this->view("searchProduct", [
-                            'title' => 'Pesquisa de Produtos',
-                            'action' => 'product/search',
-                            'error' => $error
-                        ]);
-                        return;
-                    }
-                    break;
-        
-                default:
-                    $this->redirect("product/search");
-                    return;
-            }
-        
-            $this->view("productList", compact("products", "title", "errorMessage"));
-        }
 
     protected function handleProductDecrease(string $title, string $action, int $id){
         $errorMessage = null;
@@ -229,8 +206,8 @@ class ProductController extends Controller {
     protected function executeProductCreate(){
         try{
             ProductModel::create(new Product(
-                self::input("name"),
                 self::input("barCode"),
+                self::input("name"),
                 self::input("quantity"),
                 self::input("expirationDate"),
                 LocationModel::findByData(new Location(

@@ -7,30 +7,6 @@ use Exception;
 
 class LocationModel {
     /**
-     * Create a new location in the database
-     */
-    public static function create(Location $location): bool {
-        try {
-            $sql = "INSERT INTO location (sector, floor, position) VALUES (?, ?, ?)";
-            $params = [
-                $location->getSector(),
-                $location->getFloor(),
-                $location->getPosition()
-            ];
-            
-            Database::executePrepared($sql, "sii", $params);
-            
-            // Get generated ID and assign to location object
-            $id = Database::getLastInsertId();
-            $location->setId($id);
-            
-            return true;
-        } catch (Exception $e) {
-            throw new Exception("Erro ao cadastrar endereço: " . $e->getMessage());
-        }
-    }
-
-    /**
      * List all registered locations
      */
     public static function list(): array {
@@ -49,26 +25,42 @@ class LocationModel {
         }
     }
 
+
     /**
-     * Find location by ID
+     * Find location by -- informed --
      */
-    public static function findById(int $id): ?Location {
+
+    private static function getLocationsBy(string $field, string|int $value): ?Location {
         try {
-            $sql = "SELECT * FROM location WHERE id = ?";
-            $params = [$id];
-            
-            $result = Database::executePrepared($sql, "i", $params);
+            $sql = "SELECT * FROM location WHERE $field = ?";
+            $params = [$value];
+            $result = Database::executePrepared($sql, "s", $params);
             
             if ($row = $result->fetch_assoc()) {
                 return self::mapToLocation($row);
             }
-            
-            return null;
+
+            throw new Exception("Location not found");
         } catch (Exception $e) {
             throw new Exception("Error finding location: " . $e->getMessage());
         }
     }
 
+    /**
+     * Find location by ID
+     */
+    public static function findById(int $id): ?Location {
+        try {
+            return self::getLocationsBy("id", $id); 
+        } catch (Exception $e) {
+            throw new Exception("Error finding location: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Find fields by Data
+     */
+    
     /**
      * Find location by data
      */
@@ -87,7 +79,7 @@ class LocationModel {
                 return self::mapToLocation($row);
             }
             
-            return self::create($location) ? $location : null;
+            //return self::create($location) ? $location : null;
         } catch (Exception $e) {
             throw new Exception("Error finding location: " . $e->getMessage());
         }
@@ -142,27 +134,6 @@ class LocationModel {
             return true;
         } catch (Exception $e) {
             throw new Exception("Error updating location: " . $e->getMessage());
-        }
-    }
-    /**
-     * Get all locations in a specific sector
-     */
-
-    public static function getLocationsBySector(string $sector): array {
-        try {
-            $sql = "SELECT * FROM location WHERE sector = ? ORDER BY floor, position";
-            $params = [$sector];
-            
-            $result = Database::executePrepared($sql, "s", $params);
-            
-            $locations = [];
-            while ($row = $result->fetch_assoc()) {
-                $locations[] = self::mapToLocation($row);
-            }
-            
-            return $locations;
-        } catch (Exception $e) {
-            throw new Exception("Error getting locations by sector: " . $e->getMessage());
         }
     }
 

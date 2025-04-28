@@ -46,6 +46,7 @@ class ProductModel {
 
     /**
      * List products near expiry date
+     * need refactor
      */
     public static function getByExpiryDate(): array {
         try {
@@ -66,14 +67,25 @@ class ProductModel {
 
     /**
      * List products with low stock
+     * need refactor
      */
     public static function getByLowStock(): array {
         try {
-            $sql = "SELECT product.*, location.* FROM product
+            $sql = "SELECT product.barcode,
+                        MIN(product.product_id) as product_id,
+                        MIN(product.name) as name,
+                        SUM(product.quantity) as quantity,
+                        MIN(product.expiry_date) as expiry_date,
+                        MIN(location.id) as location_id,
+                        MIN(location.sector) as sector,
+                        MIN(location.floor) as floor,
+                        MIN(location.position) as position
+                    FROM product
                     INNER JOIN location ON product.location_id = location.id
-                    WHERE product.quantity <= 10 
+                    WHERE product.quantity <= ?
                     GROUP BY product.barcode";
-            $result = Database::query($sql);
+            $params = [10];
+            $result = Database::executePrepared($sql, "i", $params);
             
             $products = [];
             while ($row = $result->fetch_assoc()) {
@@ -85,18 +97,19 @@ class ProductModel {
         }
     }
 
-    /**
-     * Get product by ID
-     */
-    public static function getById(int $id): ?Product {
-        try {
+    /*
+    *Get product by -- informed --
+    */
+    private static function getProductBy(string $field, int|string $value): ?Product{
+        try{
             $sql = "SELECT product.*, location.* 
                     FROM product
                     INNER JOIN location ON product.location_id = location.id
-                    WHERE product.product_id = ?";
+                    WHERE product.$field = ?";
             
-            $params = [$id];
-            $result = Database::executePrepared($sql, "i", $params);
+            $params = [$value];
+            $paramType = is_int($value) ? "i" : "s";
+            $result = Database::executePrepared($sql, $paramType, $params);
             
             if ($row = $result->fetch_assoc()) {
                 return self::mapToProduct($row);
@@ -104,24 +117,22 @@ class ProductModel {
             
             return null;
         } catch (Exception $e) {
-            throw new Exception("Erro ao buscar produto pelo ID: " . $e->getMessage());
+            throw new Exception("Erro ao buscar produto pelo $field: " . $e->getMessage());
         }
     }
 
-    /**
-     * Get products by barcode
-     */
-    public static function getByBarcode(string $barcode): array {
+    private static function getMultipleProductsBy(string $field, int|string $value, string $operator = '='): array{
         try {
             $sql = "SELECT product.*, location.* 
                     FROM product
                     INNER JOIN location ON product.location_id = location.id
-                    WHERE product.barcode = ?";
+                    WHERE product.$field $operator ?";
             
-            $params = [$barcode];
-            $result = Database::executePrepared($sql, "s", $params);
+            $params = [$value];
+            $paramType = is_int($value) ? "i" : "s";
+            $result = Database::executePrepared($sql, $paramType, $params);
             
-            $products = [];
+            $products = []; 
             while ($row = $result->fetch_assoc()) {
                 $products[] = self::mapToProduct($row);
             }
@@ -133,48 +144,44 @@ class ProductModel {
     }
 
     /**
+     * Get product by ID
+     */
+    public static function getById(int $id): ?Product {
+        try {
+            return self::getProductBy("product_id", $id);
+        } catch (Exception $e) {
+            throw new Exception("Erro ao buscar produto pelo ID: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get products by barcode
+     */
+    public static function getByBarcode(string $barcode): array {
+        try {
+            return self::getMultipleProductsBy("barcode", $barcode);
+        } catch (Exception $e) {
+            throw new Exception("Erro ao listar produtos pelo código de barras: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Get products by name
      */
     public static function getByName(string $name): array {
         try {
-            $sql = "SELECT product.*, location.* 
-                    FROM product
-                    INNER JOIN location ON product.location_id = location.id
-                    WHERE product.name LIKE ?";
-            
-            $params = ["%$name%"];
-            $result = Database::executePrepared($sql, "s", $params);
-            
-            $products = [];
-            while ($row = $result->fetch_assoc()) {
-                $products[] = self::mapToProduct($row);
-            }
-            
-            return $products;
+            return self::getMultipleProductsBy("name", "%$name%", "like");
         } catch (Exception $e) {
             throw new Exception("Erro ao listar produtos pelo nome: " . $e->getMessage());
         }
     }
-
+    
     /**
      * Get products by location
      */
     public static function getByLocationId(int $locationId): array {
         try {
-            $sql = "SELECT product.*, location.* 
-                    FROM product
-                    INNER JOIN location ON product.location_id = location.id
-                    WHERE product.location_id = ?";
-            
-            //$params = [$locationId];
-            $result = Database::executePrepared($sql, "i", [$locationId]);
-            
-            $products = [];
-            while ($row = $result->fetch_assoc()) {
-                $products[] = self::mapToProduct($row);
-            }
-            
-            return $products;
+            return self::getMultipleProductsBy("location_id", $locationId);
         } catch (Exception $e) {
             throw new Exception("Erro ao listar produtos pelo endereço: " . $e->getMessage());
         }
@@ -188,17 +195,29 @@ class ProductModel {
             $sql = "UPDATE product 
                     SET name = ?, barcode = ?, quantity = ?, expiry_date = ?, location_id = ?
                     WHERE product_id = ?";
-            
-            $params = self::extractData($product);
-            
-            Database::executePrepared($sql, "ssissi", $params);
+                    
+            Database::executePrepared($sql, "ssissi", self::extractData($product));
             
             return true;
         } catch (Exception $e) {
             throw new Exception("Erro ao atualizar produto: " . $e->getMessage());
         }
     }
-
+    
+    /**
+     * Update a field of products
+     */
+    public static function updateField(string $modifiedField, string|int $modifiedValue, string $baseField, string|int $baseValue): bool {
+        try {
+            $sql = "UPDATE product SET $modifiedField = ? WHERE $baseField = ?";
+            $paramsType = [is_int($modifiedValue) ? "i" : "s", is_int($baseValue) ? "i" : "s"];
+            Database::executePrepared($sql, $paramsType, [$modifiedValue, $baseValue]);
+            return true;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao atualizar produto: " . $e->getMessage());
+        }
+    }
+    
     /**
      * Update all products in a location
      */
@@ -206,10 +225,7 @@ class ProductModel {
     public static function updateAllLocations($originLocationId, $destinationLocationId): bool {
         try {
             $sql = "UPDATE product SET location_id = ? WHERE location_id = ?";
-            
-            $params = [$destinationLocationId, $originLocationId];
-            
-            Database::executePrepared($sql, "ii", $params);
+            Database::executePrepared($sql, "ii", [$destinationLocationId, $originLocationId]);
             
             return true;
         } catch (Exception $e) {
@@ -223,24 +239,39 @@ class ProductModel {
     public static function updateStock(Product $product): bool {
         try {
             $sql = "UPDATE product SET quantity = ? WHERE product_id = ?";
-            $params = [$product->getQuantity(), $product->getId()];
-            Database::executePrepared($sql, "ii", $params);
+            Database::executePrepared($sql, "ii", [$product->getQuantity(), $product->getId()]);
+
             return true;
         } catch (Exception $e) {
             throw new Exception("Erro ao atualizar estoque: " . $e->getMessage());
         }
     }
     
+    /*
+    * Delete product by -- informed --
+    */
+
+    public static function deleteProductsBy(string $field, string|int $value): bool {
+        try {
+            $sql = "DELETE FROM product WHERE $field = ?";
+            $params = [$value];
+            $paramType = "s";
+            if(is_int($value)){
+                $paramType = "i";
+            }
+            Database::executePrepared($sql, $paramType, $params);
+            return true;
+        } catch (Exception $e) {
+            throw new Exception("Erro ao excluir produto: " . $e->getMessage());
+        }
+    }
+    
     /**
      * Delete product
      */
-    public static function delete(int $id): bool {
+    public static function deleteById(int $id): bool {
         try {
-            $sql = "DELETE FROM product WHERE product_id = ?";
-            //$params = [$id];
-            Database::executePrepared($sql, "i", [$id]);
-            
-            return true;
+            return self::deleteProductsBy("product_id", $id);
         } catch (Exception $e) {
             throw new Exception("Erro ao excluir produto: " . $e->getMessage());
         }
@@ -252,11 +283,19 @@ class ProductModel {
 
     public static function deleteByLocationId(int $locationId): bool {
         try {
-            $sql = "DELETE FROM product WHERE location_id = ?";
-            //$params = [$locationId];
-            Database::executePrepared($sql, "i", [$locationId]);
-            
-            return true;
+            return self::deleteProductsBy("location_id", $locationId);
+        } catch (Exception $e) {
+            throw new Exception("Erro ao excluir produto: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete products where stock is 0
+     */
+
+    public static function deleteByStock(): bool {
+        try {
+            return self::deleteProductsBy("quantity", 0);
         } catch (Exception $e) {
             throw new Exception("Erro ao excluir produto: " . $e->getMessage());
         }
@@ -264,7 +303,7 @@ class ProductModel {
 
     /**
      * Map database result to Product object
-     */
+    */
     private static function mapToProduct(array $row): Product {
         $location = new Location($row['sector'], $row['floor'], $row['position'], $row['location_id']);
         return new Product(

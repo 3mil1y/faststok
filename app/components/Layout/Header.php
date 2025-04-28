@@ -15,9 +15,12 @@ class Header {
         'dropdown_button' => 'flex items-center justify-between w-full md:w-auto px-4 py-2 text-white rounded-md transition-colors duration-200',
         'dropdown_menu' => 'absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg hidden z-50',
         'dropdown_item' => 'block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200',
-        'mobile_menu_button' => 'md:hidden text-white p-2 rounded-md hover:bg-gray-700 transition-colors duration-200',
-        'mobile_menu' => 'md:hidden w-full bg-gray-800 mt-2 rounded-md shadow-lg hidden',
-        'mobile_menu_item' => 'block px-4 py-2 text-white hover:bg-gray-700 transition-colors duration-200'
+        'mobile_menu_button' => 'md:hidden text-white p-3 rounded-md hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400',
+        'mobile_menu' => 'md:hidden w-full bg-gray-800 mt-2 rounded-md shadow-lg hidden transition-all duration-300 ease-in-out',
+        'mobile_menu_item' => 'block w-full text-left px-5 py-3 text-white text-base font-medium hover:bg-gray-700 transition-colors duration-200 rounded-md',
+        'mobile_menu_search_container' => 'w-full px-4 py-3',
+        'mobile_menu_search_input' => 'w-full border rounded px-3 py-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-400',
+        'mobile_menu_search_button' => 'w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors duration-200',
     ];
 
     private const BUTTON_STYLES = [
@@ -32,15 +35,14 @@ class Header {
         return "
             <div class='" . self::CLASSES['logo_container'] . "'>
                 <div class='" . self::CLASSES['logo_text'] . "'>
-                <a href='product/home'>
-                   <svg class='" . self::CLASSES['logo_icon'] . "' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'/>
-                    </svg>
-                    </a>
                     <a href='product/home'>
-                    <span>FastStok</span>
-                    
-                </a>
+                        <svg class='" . self::CLASSES['logo_icon'] . "' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                            <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'/>
+                        </svg>
+                    </a>
+                    <a class='sm:block md:hidden lg:block' href='product/home'>
+                        <span>FastStok</span>
+                    </a>
                 </div>
             </div>";
     }
@@ -54,6 +56,7 @@ class Header {
                 <div id='adminDropdown' class='" . self::CLASSES['dropdown_menu'] . "'>
                     <a href='admin/list' class='" . self::CLASSES['dropdown_item'] . "'>Listar Usuários</a>
                     <a href='admin/createUser' class='" . self::CLASSES['dropdown_item'] . "'>Adicionar Usuário</a>
+                    <a href='product/deleteByStock' class='" . self::CLASSES['dropdown_item'] . "'>Excluir Estoque Baixo</a>
                 </div>
             </div>" : "";
 
@@ -135,25 +138,46 @@ class Header {
             </script>";
     }
 
-    private static function generateMobileMenu($role): string {
+    private static function generateSearch(): string {
+        return "
+            <div class='hidden md:flex items-center space-x-4 text-black'>
+                <form action='product/search' method='POST' class='flex items-center'>
+                    <input type='hidden' name='searchType' id='searchType' value='barCode'>
+                    <input type='text' name='query' id='query' class='border rounded px-2 py-1' placeholder='Insira um Cód. Barras'>
+                    <button type='submit' class='bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded'>🔍</button>
+                </form>
+            </div>";
+    }
 
+    private static function generateMobileMenu($role): string {
         $adminMenu = ($role === 'admin') ? "
                 <a href='/admin/list' class='" . self::CLASSES['mobile_menu_item'] . "'>Listar Usuários</a>
                 <a href='/admin/createUser' class='" . self::CLASSES['mobile_menu_item'] . "'>Adicionar Usuário</a>" : "";
-
+        
+        // Mobile search form
+        $mobileSearch = "
+            <div class='" . self::CLASSES['mobile_menu_search_container'] . "'>
+                <form action='product/search' method='POST' class='flex flex-col gap-2'>
+                    <input type='hidden' name='searchType' id='searchTypeMobile' value='barCode'>
+                    <input type='text' name='query' id='queryMobile' class='" . self::CLASSES['mobile_menu_search_input'] . "' placeholder='Insira um Cód. Barras'>
+                    <button type='submit' class='" . self::CLASSES['mobile_menu_search_button'] . "'>Pesquisar</button>
+                </form>
+            </div>";
+        
         return "
-            <button id='mobile-menu-button' class='" . self::CLASSES['mobile_menu_button'] . "' aria-label='Menu'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+            <button id='mobile-menu-button' class='" . self::CLASSES['mobile_menu_button'] . "' aria-label='Abrir menu de navegação' aria-controls='mobile-menu' aria-expanded='false' tabindex='0'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
                     <line x1='3' y1='12' x2='21' y2='12'></line>
                     <line x1='3' y1='6' x2='21' y2='6'></line>
                     <line x1='3' y1='18' x2='21' y2='18'></line>
                 </svg>
             </button>
-            <div id='mobile-menu' class='" . self::CLASSES['mobile_menu'] . "'>
+            <nav id='mobile-menu' class='" . self::CLASSES['mobile_menu'] . "' aria-label='Menu de navegação mobile' tabindex='-1'>
+                $mobileSearch
                 <a href='/product/home' class='" . self::CLASSES['mobile_menu_item'] . "'>Home</a>
                 <a href='/product/search' class='" . self::CLASSES['mobile_menu_item'] . "'>Produtos</a>
                 <a href='/product/create' class='" . self::CLASSES['mobile_menu_item'] . "'>Endereçar Produto</a>
-                <a href='/product/continueCreate' class='" . self::CLASSES['mobile_menu_item'] . "'>Endereçamento Continuo de Produto</a>
+                <a href='/product/continueCreate' class='" . self::CLASSES['mobile_menu_item'] . "'>Endereçamento Contínuo de Produto</a>
                 <a href='/product/search' class='" . self::CLASSES['mobile_menu_item'] . "'>Pesquisar</a>
                 <a href='/report/expiry' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Validade</a>
                 <a href='/report/stock' class='" . self::CLASSES['mobile_menu_item'] . "'>Relatório de Estoque</a>
@@ -161,14 +185,38 @@ class Header {
                 <a href='/transfer/external' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferências de Saída</a>
                 <a href='/transfer/continueInternal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferência Interna Contínua</a>
                 <a href='/transfer/continueExternal' class='" . self::CLASSES['mobile_menu_item'] . "'>Transferência de Saída Contínua</a>  
-                " . $adminMenu . "
+                $adminMenu
                 <a href='/user/logout' class='" . self::CLASSES['mobile_menu_item'] . "'>Sair</a>
-            </div>
+            </nav>
             <script>
-                document.getElementById('mobile-menu-button').addEventListener('click', function() {
-                    document.getElementById('mobile-menu').classList.toggle('hidden');
+                const menuBtn = document.getElementById('mobile-menu-button');
+                const menu = document.getElementById('mobile-menu');
+                menuBtn.addEventListener('click', function(e) {
+                    menu.classList.toggle('hidden');
+                    menuBtn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
+                    if (!menu.classList.contains('hidden')) {
+                        menu.focus();
+                    }
+                });
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!event.target.closest('#mobile-menu') && !event.target.closest('#mobile-menu-button')) {
+                        menu.classList.add('hidden');
+                        menuBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                // Trap focus inside menu when open
+                menu.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        menu.classList.add('hidden');
+                        menuBtn.setAttribute('aria-expanded', 'false');
+                        menuBtn.focus();
+                    }
                 });
             </script>";
+    }
+    private static function generateDesktopMenu($role): string {
+        return self::generateSearch() . self::generateDropdowns($role);
     }
 
     public static function render(): string {
@@ -179,97 +227,9 @@ class Header {
                 <div class='" . self::CLASSES['header_container'] . "'>
                     " . self::generateLogo() . "
                     " . self::generateMobileMenu($role) . "
-                    " . self::generateDropdowns($role) . "
+                    " . self::generateDesktopMenu($role) . "
                 </div>
             </header>";
     }
 }
-
-// namespace Components;
-
-// class Cabecalho {
-
-//     public static function exibirCabecalho(bool $isAdmin = false): string {
-//         $adminButton = $isAdmin ? "
-//             <div class='relative'>
-//                 <button class='text-white px-4 py-2 rounded bg-blue-600 hover:bg-blue-700' onclick='toggleDropdown(\"adminDropdown\")'>
-//                     Alterações
-//                 </button>
-//                 <div id='adminDropdown' class='absolute right-0 mt-2 w-24 bg-white border rounded-md shadow-lg hidden z-50'>
-//                     <a href='usuarios/lista.php' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Listar Usuários</a>
-//                     <a href='usuarios/cadastro.php' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Adicionar Usuário</a>
-//                 </div>
-//             </div>
-//         " : "";
-
-//         return "
-//         <header class='bg-gray-800 text-white p-4 flex justify-between items-center flex-wrap'>
-//             <div class='flex items-center mb-4 md:mb-0'>
-//                 <div class='text-xl font-bold flex items-center'>
-//                      <span class='mr-2'>
-//                             <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-//                                 <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 5h18M3 5a2 2 0 012-2h14a2 2 0 012 2M3 5a2 2 0 012 2v12a2 2 0 012 2h12a2 2 0 012-2V7a2 2 0 012-2' />
-//                             </svg>
-//                         </span>
-//                     <a href='produto/listar'>   
-//                         FastStok
-//                     </a>
-//                 </div>
-//             </div>
-//             <div class='flex items-center space-x-4 flex-wrap md:flex-nowrap'>
-//                 <!-- Endereçamento Dropdown -->
-//                 <div class='relative'>
-//                     <button class='text-white px-4 py-2 rounded bg-purple-600 hover:bg-purple-700' onclick='toggleDropdown(\"enderecamentoDropdown\")'>
-//                         Endereçamento
-//                     </button>
-//                     <div id='enderecamentoDropdown' class='absolute right-0 mt-2 w-24 bg-white border rounded-md shadow-lg hidden z-50'>
-//                         <a href='produto/pesquisar' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Buscar Endereços</a>
-//                         <a href='produto/cadastrar' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Endereçar Produto</a>
-//                     </div>
-//                 </div>
-//                 <!-- Relatórios Dropdown -->
-//                 <div class='relative'>
-//                     <button class='text-white px-4 py-2 rounded bg-green-600 hover:bg-green-700' onclick='toggleDropdown(\"relatoriosDropdown\")'>
-//                         Relatórios
-//                     </button>
-//                     <div id='relatoriosDropdown' class='absolute right-0 mt-2 w-24 bg-white border rounded-md shadow-lg hidden z-50'>
-//                         <a href='relatorio/validade' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Validade</a>
-//                         <a href='relatorio/estoque' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Baixo Estoque</a>
-//                     </div>
-//                 </div>
-//                 <!-- Transferências Dropdown -->
-//                 <div class='relative'>
-//                     <button class='text-white px-4 py-2 rounded bg-yellow-600 hover:bg-yellow-700' onclick='toggleDropdown(\"transferenciasDropdown\")'>
-//                         Transferências
-//                     </button>
-//                     <div id='transferenciasDropdown' class='absolute right-0 mt-2 w-24 bg-white border rounded-md shadow-lg hidden z-50'>
-//                         <a href='transferencia/interna' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Internas</a>
-//                         <a href='transferencia/saida' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Saída</a>
-//                     </div>
-//                 </div>
-//                 $adminButton
-//                 <!-- Usuário Dropdown -->
-//                 <div class='relative'>
-//                     <button class='text-white px-4 py-2 rounded bg-blue-600 hover:bg-blue-700' onclick='toggleDropdown(\"usuarioDropdown\")'>
-//                         Usuário
-//                     </button>
-//                     <div id='usuarioDropdown' class='absolute right-0 mt-2 w-24 bg-white border rounded-md shadow-lg hidden z-50'>
-//                         <a href='validacoes/logout.php' class='block px-4 py-2 text-gray-800 hover:bg-gray-200'>Logout</a>
-//                     </div>
-//                 </div>
-//             </div>
-//         </header>
-
-//         <script>
-//             function toggleDropdown(id) {
-//                 const dropdown = document.getElementById(id);
-//                 dropdown.classList.toggle('hidden');
-//             }
-//         </script>
-//         ";
-//     }
-// }
-
-
 ?>
-

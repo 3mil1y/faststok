@@ -50,14 +50,15 @@ class UserModel {
     }
 
     /**
-     * Find user by ID
+     * Get user by -- informed --
      */
-    public static function getById(int $id): ?User {
+
+    private static function getUserBy(string $field, string|int $value): ?User {
         try {
-            $sql = "SELECT id, login, role FROM user WHERE id = ?";
-            $params = [$id];
-            
-            $result = Database::executePrepared($sql, "i", $params);
+            $sql = "SELECT id, login, role FROM user WHERE $field = ?";
+            $params = [$value];
+            $paramType = is_int($value) ? "i" : "s";
+            $result = Database::executePrepared($sql, $paramType, $params);
             
             if ($row = $result->fetch_assoc()) {
                 return self::mapToUser($row);
@@ -70,20 +71,22 @@ class UserModel {
     }
 
     /**
+     * Find user by ID
+     */
+    public static function getById(int $id): ?User {
+        try {
+            return self::getUserBy("id", $id); 
+        } catch (Exception $e) {
+            throw new Exception("Error finding user: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Find user by login
      */
     public static function getByLogin(string $login): ?User {
         try {
-            $sql = "SELECT id, login, role FROM user WHERE login = ?";
-            //$params = [$login];
-            
-            $result = Database::executePrepared($sql, "s", [$login]);
-            
-            if ($row = $result->fetch_assoc()) {
-                return self::mapToUser($row);
-            }
-            
-            return null;
+            return self::getUserBy("login", $login); 
         } catch (Exception $e) {
             throw new Exception("Error finding user: " . $e->getMessage());
         }

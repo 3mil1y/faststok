@@ -15,11 +15,11 @@ class Head {
             <script src='https://cdn.tailwindcss.com'></script>
              -->
             
-            <base href='/test/faststok/'>
+            <base href='/faststok/'>
 
 
             <!-- Custom styles -->
-            <link rel='stylesheet' href='/test/faststok/public/css/tail.css'>
+            <link rel='stylesheet' href='/faststok/public/css/tail.css'>
             
             <!-- Custom JavaScript -->
             <script>

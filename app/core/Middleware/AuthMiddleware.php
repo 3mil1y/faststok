@@ -6,8 +6,8 @@ use App\Core\SessionManager;
 
 class AuthMiddleware implements Middleware {
     private $publicRoutes = [
-        '/test/faststok/user/login',
-        '/test/faststok/validations/login',
+        '/faststok/user/login',
+        '/faststok/validations/login',
     ];
 
     public function handle() {
@@ -21,7 +21,7 @@ class AuthMiddleware implements Middleware {
 
         // Check if user is authenticated
         if (!SessionManager::isAuthenticated()) {
-            header('Location: /test/faststok/user/login');
+            header('Location: /faststok/user/login');
             exit();
         }
     }
