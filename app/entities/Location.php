@@ -58,5 +58,14 @@ class Location {
     public function __toString(): string {
         return "Sector: {$this->sector}, Floor: {$this->floor}, Position: {$this->position}";
     }
+
+    public function __toJson(): string {
+        return json_encode([
+            'id' => $this->id,
+            'sector' => $this->sector,
+            'floor' => $this->floor,
+            'position' => $this->position
+        ]);
+    }
 }
 ?>

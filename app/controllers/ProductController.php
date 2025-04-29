@@ -101,17 +101,17 @@ class ProductController extends Controller {
     //Need implement view
     //Need Error treatment
     public function deleteByStock() {
-        // if(self::isPost()){
+        if(self::isPost()){
             ProductModel::deleteByStock();
             $this->redirect("product/home");
             return;
-        // }
+        }
 
         
 
-        // $title = "Excluir Estoque Baixo";
-        // $action = "product/deleteByStock";
-        // $this->view("deleteByStock", compact("title", "action"));
+        $title = "Excluir Estoque Baixo";
+        $action = "product/deleteByStock";
+        $this->view("deleteLowStock", compact("title", "action"));
     }
 
     protected function handleProductCreate(string $title, string $action, bool $shouldRedirect = false){
