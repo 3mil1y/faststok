@@ -50,4 +50,19 @@ class User {
     public function isAdmin(): bool {
         return $this->role === 'admin';
     }
+
+    public function __toString(): string {
+        return "User: {$this->login}<br>
+                Role: {$this->role}";
+    }
+
+    public function __toJson(): string {
+        return json_encode([
+            'id' => $this->id,
+            'login' => $this->login,
+            'password' => $this->password,
+            'role' => $this->role
+        ]);
+    }
 }
+?>

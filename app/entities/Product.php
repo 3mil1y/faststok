@@ -89,5 +89,16 @@ class Product {
                 Expiry Date: {$this->expiryDate}<br>
                 Location: {$this->location}";
     }
+
+    public function __toJson(): string {
+        return json_encode([
+            'id' => $this->id,
+            'barcode' => $this->barcode,
+            'name' => $this->name,
+            'quantity' => $this->quantity,
+            'expiryDate' => $this->expiryDate,
+            'location' => $this->location->getLocationString()
+        ]);
+    }
 }
 ?>
